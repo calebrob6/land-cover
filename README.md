@@ -5,6 +5,8 @@ Repo accompanying the CVPR 2019 paper "Large Scale High-Resolution Land Cover Ma
 
 ## Data
 
+The data can be downloaded from [here](https://lilablobssc.blob.core.windows.net/lcmcvpr2019/small.zip).
+
 
 ## References
 
