@@ -225,6 +225,7 @@ def main():
         current_profile['driver'] = 'GTiff'
         current_profile['dtype'] = 'uint8'
         current_profile['count'] = 1
+        current_profile['compress'] = "lzw"
         f = rasterio.open(os.path.join(output_base, output_class_fn), 'w', **current_profile)
         f.write(output_classes, 1)
         f.close()
