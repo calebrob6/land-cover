@@ -1,6 +1,12 @@
 # Large Scale High-Resolution Land Cover Mapping with Multi-Resolution Data
 
-Code and data accompanying the CVPR 2019 paper "Large Scale High-Resolution Land Cover Mapping with Multi-Resolution Data".
+Repo accompanying the CVPR 2019 paper "Large Scale High-Resolution Land Cover Mapping with Multi-Resolution Data".
+
+
+## Data
+
+
+## References
 
 ```
 @inproceedings{robinson2019large,

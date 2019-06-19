@@ -24,11 +24,6 @@ import rasterio.mask
 from shapely.geometry import mapping
 from collections import defaultdict
 
-NLCD_CLASSES = [
-    0, 11, 12, 21, 22, 23, 24, 31, 41, 42, 43, 51, 52, 71, 72, 73, 74, 81, 82, 90, 95, 255
-]
-cid = defaultdict(lambda: 0, {cl:i for i,cl in enumerate(NLCD_CLASSES)})
-
 # Setup
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -38,11 +33,11 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 def do_args(arg_list, name):
     parser = argparse.ArgumentParser(description=name)
 
-    parser.add_argument("--pred_blob_root", action="store", dest="pred_blob_root", type=str, required=True, \
-        help="Path to NAIP blobfuse root directory"
+    parser.add_argument("--output", action="store", dest="output", type=str, required=True, \
+        help="Output directory to store predictions"
     )
-    parser.add_argument("-i", "--input_list", action="store", dest="input_fn", type=str, required=True, \
-        help="Input file name (pair list CSV file with 'lc_blob_name' column"
+    parser.add_argument("--input", action="store", dest="input_fn", type=str, required=True, \
+        help="Path to filename that lists tiles"
     )
 
     return parser.parse_args(arg_list)
@@ -66,14 +61,15 @@ def main():
     program_name = "Accuracy computing script"
     args = do_args(sys.argv[1:], program_name)
 
-    pred_blob_root = args.pred_blob_root
+    pred_dir = args.output
     input_fn = args.input_fn
+    data_dir = os.path.dirname(input_fn)
 
     logging.info("Starting %s at %s" % (program_name, str(datetime.datetime.now())))
 
     try:
-        input_df = pd.read_csv(input_fn)
-        pair_list = input_df[["naip_path", "lc_path", "nlcd_path"]].values
+        df = pd.read_csv(input_fn)
+        fns = df[["naip_fn","lc_fn","nlcd_fn"]].values
     except Exception as e:
         logging.error("Could not load the input file")
         logging.error(e)
@@ -83,51 +79,39 @@ def main():
     cm_dev = np.zeros((4, 4), dtype=np.float32)
     acc_sum = 1e-6
     acc_num = 1e-6
-    for i in range(len(pair_list)):
-        naip_fn = pair_list[i][0]
-        lc_fn = pair_list[i][1]
-        nlcd_fn = pair_list[i][2]
+    for i in range(len(fns)):
+        naip_fn = os.path.join(data_dir, fns[i][0])
+        lc_fn   = os.path.join(data_dir, fns[i][1])
+        nlcd_fn = os.path.join(data_dir, fns[i][2])
 
-        naip_f = rasterio.open(naip_fn, "r")
-        naip_data = naip_f.read()
-        naip_f.close()
-        if (naip_data.max(axis=0)==0).sum() > 0:
-            continue
 
-        pred_fn = os.path.join(pred_blob_root, os.path.basename(naip_fn)[:-4] + '_class.tif')
+        pred_fn = os.path.join(pred_dir, os.path.basename(naip_fn)[:-4] + '_class.tif')
         pred_f = rasterio.open(pred_fn, "r")
-        pred_bounds = pred_f.bounds
+        pred = pred_f.read()
+        pred_f.close()
 
         lc_f = rasterio.open(lc_fn, "r")
-        lc_bounds = lc_f.bounds
+        lc = lc_f.read()
+        lc_f.close()
 
         nlcd_f = rasterio.open(nlcd_fn, "r")
-        nlcd_bounds = nlcd_f.bounds
-
-        bounds = bounds_intersection(bounds_intersection(pred_bounds, lc_bounds), nlcd_bounds)
-        left, bottom, right, top = bounds
-        geom = mapping(shapely.geometry.box(left, bottom, right, top, ccw=True))
-
-        pred, _ = rasterio.mask.mask(pred_f, [geom], crop=True)
-        pred_f.close()
-        lc, _ = rasterio.mask.mask(lc_f, [geom], crop=True)
-        lc_f.close()
-        nlcd, _ = rasterio.mask.mask(nlcd_f, [geom], crop=True)
+        nlcd = nlcd_f.read()
         nlcd_f.close()
-        nlcd = np.vectorize(cid.__getitem__)(np.squeeze(nlcd)).astype(np.uint8)
+
+        nlcd = nlcd.squeeze().astype(int)
 
         lc[lc==5] = 4
         lc[lc==6] = 4
         lc[lc>=7] = 0
-        lc = np.squeeze(lc)
+        lc = np.squeeze(lc).astype(int)
 
         pred[pred==5] = 4
         pred[pred==6] = 4
         pred[pred>=7] = 0
-        pred = np.squeeze(pred)
+        pred = np.squeeze(pred).astype(int)
 
-        roi = (lc>0) * (pred>0)
-        roi_dev = (lc>0) * (pred>0) * (nlcd>=4) * (nlcd<=6)
+        roi = (lc>0) & (pred>0)
+        roi_dev = (lc>0) & (pred>0) & (nlcd>=21) & (nlcd<=24)
 
         if np.sum(roi) > 0:
             if np.sum(roi_dev) > 0:
@@ -139,8 +123,8 @@ def main():
         else:
             accuracy = -1
 
-        logging.info("Accuracy %f %s\t%d/%d %f" % (accuracy, lc_fn, i+1, len(pair_list), acc_sum/acc_num))
-        print(np.round(cm / np.sum(cm) * 1000).astype(np.uint32))
+        logging.info("Accuracy %f %s\t%d/%d %f" % (accuracy, lc_fn, i+1, len(fns), acc_sum/acc_num))
+        print(np.round(cm / np.sum(cm) * 1000))
 
     print("-----------------------------")
     print(acc_sum/acc_num)

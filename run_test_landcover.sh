@@ -72,8 +72,8 @@ do
 
     echo ${PRED_OUTPUT}/${EXP_NAME_OUT}/log_acc_${TEST_SPLIT}.txt
     unbuffer python -u compute_accuracy.py \
-        --input_list ${TEST_CSV} \
-        --pred_blob_root ${PRED_OUTPUT}/${EXP_NAME_OUT} \
+        --input ${TEST_CSV} \
+        --output ${PRED_OUTPUT}/${EXP_NAME_OUT} \
         &> ${PRED_OUTPUT}/${EXP_NAME_OUT}/log_acc_${TEST_SPLIT}.txt &
 done
 

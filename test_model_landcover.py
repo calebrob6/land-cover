@@ -93,16 +93,13 @@ def do_args(arg_list, name):
     parser = argparse.ArgumentParser(description=name)
 
     parser.add_argument("--input", action="store", dest="input_fn", type=str, required=True, \
-        help="Path to filename that lists tiless"
+        help="Path to filename that lists tiles"
     )
     parser.add_argument("--output", action="store", dest="output_base", type=str, required=True, \
         help="Output directory to store predictions"
     )
     parser.add_argument("--model", action="store", dest="model_fn", type=str, required=True, \
         help="Path to Keras .h5 model file to use"
-    )
-    parser.add_argument("--compress", action="store_true", default=False, \
-        help="Enable GDAL compression (requires gdal_translate)"
     )
     parser.add_argument("--grayscale_output", action="store_true", default=False, \
         help="Enable outputing grayscale probability maps for each class"
@@ -151,9 +148,7 @@ def main():
     output_shape = model.output_shape[1:]
     input_shape = model.input_shape[1:]
     model_input_size = input_shape[0]
-
-    print(input_shape, output_shape)
-    print(model.outputs)
+    assert len(model.outputs) == 1, "The loaded model has multiple outputs. You need to specify --superres if this model was trained with the superres loss."
 
     for i in range(len(fns)):
         tic = float(time.time())
@@ -183,7 +178,9 @@ def main():
             current_profile['driver'] = 'GTiff'
             current_profile['dtype'] = 'uint8'
             current_profile['count'] = 5
+            current_profile['compress'] = "lzw"
 
+            # quantize the probabilities
             bins = np.arange(256)
             bins = bins / 255.0
             output = np.digitize(output, bins=bins, right=True).astype(np.uint8)
@@ -195,24 +192,6 @@ def main():
             f.write(output[:,:,3], 4)
             f.write(output[:,:,4], 5)
             f.close()
-
-            # Run gdal_translate to compress the file we just wrote
-            if compress:
-                command = [
-                    "gdal_translate",
-                    "-of", "GTiff",
-                    "-co", "INTERLEAVE=BAND",
-                    "-co", "COMPRESS=DEFLATE",
-                    "-co", "PREDICTOR=1",
-                    "-co", "ZLEVEL=7",
-                    "-co", "TILED=YES",
-                    "-co", "BIGTIFF=YES",
-                    "-co", "NUM_THREADS=ALL_CPUS",
-                    "--config", "GDAL_CACHEMAX", "2048",
-                    os.path.join(output_base, output_fn), os.path.join(output_base, output_compressed_fn)
-                ]
-                subprocess.call(command)
-
 
         #----------------------------------------------------------------
         # Write out the class predictions
@@ -229,23 +208,6 @@ def main():
         f = rasterio.open(os.path.join(output_base, output_class_fn), 'w', **current_profile)
         f.write(output_classes, 1)
         f.close()
-
-        # Run gdal_translate to compress the file we just wrote
-        if compress:
-            command = [
-                "gdal_translate",
-                "-of", "GTiff",
-                "-co", "INTERLEAVE=BAND",
-                "-co", "COMPRESS=DEFLATE",
-                "-co", "PREDICTOR=1",
-                "-co", "ZLEVEL=7",
-                "-co", "TILED=YES",
-                "-co", "BIGTIFF=YES",
-                "-co", "NUM_THREADS=ALL_CPUS",
-                "--config", "GDAL_CACHEMAX", "2048",
-                os.path.join(output_base, output_class_fn), os.path.join(output_base, output_class_compressed_fn)
-            ]
-            subprocess.call(command)
 
         print("Finished iteration in %0.4f seconds" % (time.time() - tic))
 
