@@ -7,7 +7,7 @@ In progress.
 
 ## Data
 
-A "small" version of the dataset can be downloaded from [here](https://lilablobssc.blob.core.windows.net/lcmcvpr2019/small.zip), or at [LILA.science](http://lila.science/datasets). The dataset is described in detail at [LILA.science](http://lila.science/datasets).
+A "small" version of the dataset can be downloaded from [here](https://lilablobssc.blob.core.windows.net/lcmcvpr2019/lcm_cvpr2019_small.zip), or at [LILA.science](http://lila.science/datasets/chesapeakelandcover). Please see the [LILA.science](http://lila.science/datasets/chesapeakelandcover) page for documentation about the dataset.
 
 ## References
 
