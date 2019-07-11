@@ -5,8 +5,10 @@ from keras.layers import Lambda, Activation
 
 from keras.losses import categorical_crossentropy
 
-from architectures import UNet, FC_DenseNet
+from architectures import UNet, FC_DenseNet, FCN_Small
 from utils import load_nlcd_stats
+
+from segmentation_models import Unet as seg_Unet
 
 def jaccard_loss(y_true, y_pred, smooth=0.001, num_classes=7):                                                                              
     intersection = y_true * y_pred                                                                                                          
@@ -79,6 +81,19 @@ def fcdensenet(img_shape, num_classes, optimizer, loss):
     i, o = FC_DenseNet(img_shape, dims=[32, 16, 16, 16, 16], out_ch=num_classes)
     o = Activation("softmax", name="outputs_hr")(o)
     return make_model(i, o, optimizer, loss)
+
+def fcn_small(img_shape, num_classes, optimizer, loss):
+    i, o = FCN_Small(img_shape, out_ch=num_classes)
+    o = Activation("softmax", name="outputs_hr")(o)
+    return make_model(i, o, optimizer, loss)
+
+def unet_from_segmentation_models(img_shape, num_classes, optimizer, loss, backbone_name='resnet18'):
+    model = seg_Unet(backbone_name=backbone_name, encoder_weights=None, activation="linear", input_shape=img_shape, classes=num_classes, decoder_filters=(256,128,64,64))
+    model.layers[-1].name = "logits"
+    i = model.layers[0]
+    o = model.layers[-1]
+    return make_model(i, o, optimizer, loss)
+
 
 def make_model(inputs, outputs, optimizer, loss):    
     if loss == "superres":

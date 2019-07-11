@@ -66,7 +66,7 @@ def do_args(arg_list, name):
     parser.add_argument("--color", action="store_true", help="Enable color augmentation", default=False)
 
     parser.add_argument("--model_type", action="store", dest="model_type", type=str, \
-        choices=["unet", "unet_large", "fcdensenet"], \
+        choices=["unet", "unet_large", "fcdensenet", "fcn_small"], \
         help="Model architecture to use", required=True
     )
     parser.add_argument("--learning_rate", action="store", type=float, help="Learning rate", default=0.001)
@@ -159,10 +159,12 @@ def main():
         model = models.unet_large((240,240,4), 5, optimizer, loss)
     elif model_type == "fcdensenet":
         model = models.fcdensenet((240,240,4), 5, optimizer, loss)
+    elif model_type == "fcn_small":
+        model = models.fcn_small((240,240,4), 5, optimizer, loss)
     model.summary()
 
     validation_callback = utils.LandcoverResults(log_dir=log_dir, time_budget=time_budget, verbose=verbose)
-    learning_rate_callback = LearningRateScheduler(schedule_stepped, verbose=verbose)
+    learning_rate_callback = LearningRateScheduler(utils.schedule_stepped, verbose=verbose)
 
     model_checkpoint_callback = ModelCheckpoint(
         os.path.join(log_dir, "model_{epoch:02d}.h5"),
@@ -172,8 +174,8 @@ def main():
         period=1
     )
 
-    training_generator = datagen.DataGenerator(training_patches, batch_size, training_steps_per_epoch, 240, 240, 4, do_color_aug=do_color_aug, do_superres=do_superres, superres_states=superres_states)
-    validation_generator = datagen.DataGenerator(validation_patches, batch_size, validation_steps_per_epoch, 240, 240, 4, do_color_aug=do_color_aug, do_superres=do_superres, superres_states=[])
+    training_generator = datagen.DataGenerator(training_patches, batch_size, training_steps_per_epoch, 240, 240, 4, do_color_aug=do_color_aug, do_superres=do_superres, superres_only_states=superres_states)
+    validation_generator = datagen.DataGenerator(validation_patches, batch_size, validation_steps_per_epoch, 240, 240, 4, do_color_aug=do_color_aug, do_superres=do_superres, superres_only_states=[])
 
     model.fit_generator(
         training_generator,
@@ -185,7 +187,11 @@ def main():
         max_queue_size=64,
         workers=4,
         use_multiprocessing=True,
-        callbacks=[validation_callback, learning_rate_callback, model_checkpoint_callback],
+        callbacks=[
+            validation_callback,
+            #learning_rate_callback,
+            model_checkpoint_callback
+        ],
         initial_epoch=0 
     )
 
