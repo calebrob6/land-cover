@@ -20,7 +20,7 @@ def color_aug(colors):
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
     
-    def __init__(self, patches, batch_size, steps_per_epoch, input_size, output_size, num_channels, do_color_aug=False, do_superres=False, superres_states=[]):
+    def __init__(self, patches, batch_size, steps_per_epoch, input_size, output_size, num_channels, do_color_aug=False, do_superres=False, superres_only_states=[]):
         'Initialization'
 
         self.patches = patches
@@ -37,7 +37,7 @@ class DataGenerator(keras.utils.Sequence):
         self.do_color_aug = do_color_aug
 
         self.do_superres = do_superres
-        self.superres_states = superres_states
+        self.superres_only_states = superres_only_states
         self.on_epoch_end()
 
     def __len__(self):
@@ -74,7 +74,7 @@ class DataGenerator(keras.utils.Sequence):
             y_train_hr = keras.utils.to_categorical(y_train_hr, 5)
 
             if self.do_superres:
-                if state in self.superres_states:
+                if state in self.superres_only_states:
                     y_train_hr[:,:,0] = 0
                 else:
                     y_train_hr[:,:,0] = 1
