@@ -29,9 +29,9 @@ def schedule_decay(epoch, lr, decay=0.001):
         lr = lr * 1/(1 + decay * epoch)
     return lr
 
-def schedule_stepped(epoch, lr):
+def schedule_stepped(epoch, lr, step_size=10):
     if epoch > 0:
-        if epoch % 10 == 0:
+        if epoch % step_size == 0:
             return lr / 10.
         else:
             return lr

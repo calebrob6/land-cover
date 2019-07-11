@@ -59,6 +59,15 @@ def FC_DenseNet(img_shape, dims=[32, 16, 16, 16, 16], out_ch=1, activation='relu
     o = Conv2D(out_ch, 1, activation=None, name="logits")(o)
     return i, o
 
+def FCN_Small(img_shape, out_ch):
+    i = Input(shape=img_shape)
+    #x = Conv2D(256, (3,3), activation=LeakyReLU(alpha=0.3), padding='same')
+    x = conv_bn_relu(i, 64)
+    for j in range(15):
+        x = conv_bn_relu(x, 64)
+    o = Conv2D(out_ch, 1, activation=None, name="logits")(x)
+    return i, o
+
 if __name__ == "__main__":
     K.clear_session()
     i,o = FC_DenseNet((240,240,4), dims=[32, 16, 16, 16, 16], out_ch=5)
