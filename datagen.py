@@ -57,8 +57,20 @@ class DataGenerator(keras.utils.Sequence):
             y_sr_batch = np.zeros((self.batch_size, self.output_size, self.output_size, 22), dtype=np.float32)
         
         for i, (fn, state) in enumerate(fns):
-            data = np.load(fn).squeeze()
+            if fn.endswith(".npz"):
+                data = np.load(fn)["arr_0"].squeeze()
+            elif fn.endswith(".npy"):
+                data = np.load(fn).squeeze()
             data = np.rollaxis(data, 0, 3)
+
+            #do a random crop if input_size is less than the prescribed size
+            assert data.shape[0] == data.shape[1]
+            data_size = data.shape[0]
+            if self.input_size < data_size:
+                x_idx = np.random.randint(0, data_size - self.input_size)
+                y_idx = np.random.randint(0, data_size - self.input_size)
+                data = data[y_idx:y_idx+self.input_size, x_idx:x_idx+self.input_size, :]
+
             
             # setup x
             if self.do_color_aug:
@@ -67,7 +79,7 @@ class DataGenerator(keras.utils.Sequence):
                 x_batch[i] = data[:,:,:4] / 255.0
 
             # setup y_highres
-            y_train_hr = data[:,:,4]
+            y_train_hr = data[:,:,8]
             y_train_hr[y_train_hr==15] = 0
             y_train_hr[y_train_hr==5] = 4
             y_train_hr[y_train_hr==6] = 4
@@ -84,7 +96,7 @@ class DataGenerator(keras.utils.Sequence):
             
             # setup y_superres
             if self.do_superres:
-                y_train_nlcd = nlcd_classes_to_idx(data[:,:,5])
+                y_train_nlcd = nlcd_classes_to_idx(data[:,:,9])
                 y_train_nlcd = keras.utils.to_categorical(y_train_nlcd, 22)
                 y_sr_batch[i] = y_train_nlcd
 

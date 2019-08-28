@@ -119,7 +119,7 @@ def main():
     training_patches = []
     for state in training_states:
         print("Adding training patches from %s" % (state))
-        fn = os.path.join(data_dir, "%s_train_patches.csv" % (state))
+        fn = os.path.join(data_dir, "%s-train_patches.csv" % (state))
         df = pd.read_csv(fn)
         for fn in df["patch_fn"].values:
             training_patches.append((os.path.join(data_dir, fn), state))
@@ -127,7 +127,7 @@ def main():
     validation_patches = []
     for state in validation_states:
         print("Adding validation patches from %s" % (state))
-        fn = os.path.join(data_dir, "%s_val_patches.csv" % (state))
+        fn = os.path.join(data_dir, "%s-val_patches.csv" % (state))
         df = pd.read_csv(fn)
         for fn in df["patch_fn"].values:
             validation_patches.append((os.path.join(data_dir, fn), state))
