@@ -69,7 +69,7 @@ def main():
 
     try:
         df = pd.read_csv(input_fn)
-        fns = df[["naip_fn","lc_fn","nlcd_fn"]].values
+        fns = df[["naip-new_fn","lc_fn","nlcd_fn"]].values
     except Exception as e:
         logging.error("Could not load the input file")
         logging.error(e)

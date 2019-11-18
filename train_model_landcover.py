@@ -119,7 +119,7 @@ def main():
     training_patches = []
     for state in training_states:
         print("Adding training patches from %s" % (state))
-        fn = os.path.join(data_dir, "%s-train_patches.csv" % (state))
+        fn = os.path.join(data_dir, "%s_extended-train_patches.csv" % (state))
         df = pd.read_csv(fn)
         for fn in df["patch_fn"].values:
             training_patches.append((os.path.join(data_dir, fn), state))
@@ -127,7 +127,7 @@ def main():
     validation_patches = []
     for state in validation_states:
         print("Adding validation patches from %s" % (state))
-        fn = os.path.join(data_dir, "%s-val_patches.csv" % (state))
+        fn = os.path.join(data_dir, "%s_extended-val_patches.csv" % (state))
         df = pd.read_csv(fn)
         for fn in df["patch_fn"].values:
             validation_patches.append((os.path.join(data_dir, fn), state))
@@ -184,8 +184,8 @@ def main():
         verbose=verbose,
         validation_data=validation_generator,
         validation_steps=validation_steps_per_epoch,
-        max_queue_size=64,
-        workers=4,
+        max_queue_size=256,
+        workers=8,
         use_multiprocessing=True,
         callbacks=[
             validation_callback,

@@ -101,7 +101,7 @@ def do_args(arg_list, name):
     parser.add_argument("--model", action="store", dest="model_fn", type=str, required=True, \
         help="Path to Keras .h5 model file to use"
     )
-    parser.add_argument("--grayscale_output", action="store_true", default=False, \
+    parser.add_argument("--save_probabilities", action="store_true", default=False, \
         help="Enable outputing grayscale probability maps for each class"
     )
     parser.add_argument("--gpu", action="store", dest="gpu", type=int, required=False, \
@@ -121,8 +121,7 @@ def main():
     data_dir = os.path.dirname(input_fn)
     output_base = args.output_base
     model_fn = args.model_fn
-    compress = args.compress
-    grayscale_output = args.grayscale_output
+    save_probabilities = args.save_probabilities
     superres = args.superres
 
     print("Starting %s at %s" % (program_name, str(datetime.datetime.now())))
@@ -130,7 +129,7 @@ def main():
 
     try:
         df = pd.read_csv(input_fn)
-        fns = df[["naip_fn","lc_fn","nlcd_fn"]].values
+        fns = df[["naip-new_fn","lc_fn","nlcd_fn"]].values
     except Exception as e:
         print("Could not load the input file")
         print(e)
@@ -168,12 +167,12 @@ def main():
         #output[:,:,4] += output[:,:,5]
         #output[:,:,4] += output[:,:,6]
         output = output[:,:,:5]
+
         #----------------------------------------------------------------
         # Write out each softmax prediction to a separate file
         #----------------------------------------------------------------
-        if grayscale_output:
+        if save_probabilities:
             output_fn = os.path.basename(naip_fn)[:-4] + "_prob.tif"
-            output_compressed_fn = output_fn[:-4] + "_compressed.tif"
             current_profile = naip_profile.copy()
             current_profile['driver'] = 'GTiff'
             current_profile['dtype'] = 'uint8'
@@ -198,7 +197,6 @@ def main():
         #----------------------------------------------------------------
         output_classes = np.argmax(output, axis=2).astype(np.uint8)
         output_class_fn = os.path.basename(naip_fn)[:-4] + "_class.tif"
-        output_class_compressed_fn = output_class_fn[:-4] + "_compressed.tif"
 
         current_profile = naip_profile.copy()
         current_profile['driver'] = 'GTiff'
