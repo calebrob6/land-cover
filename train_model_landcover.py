@@ -142,8 +142,8 @@ def main():
     #------------------------------
     # Step 2, run experiment
     #------------------------------    
-    #training_steps_per_epoch = len(training_patches) // batch_size // 16
-    #validation_steps_per_epoch = len(validation_patches) // batch_size // 16
+    #training_steps_per_epoch = len(training_patches) // batch_size
+    #validation_steps_per_epoch = len(validation_patches) // batch_size
 
     training_steps_per_epoch = 300
     validation_steps_per_epoch = 39
