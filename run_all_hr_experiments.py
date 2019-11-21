@@ -7,9 +7,9 @@ import multiprocessing
 
 
 DATASET_DIR = "/media/disk2/caleb/chesapeake_data/"
-OUTPUT_DIR = "results/"
+OUTPUT_DIR = "results_run_single/"
 
-_gpu_ids = [0,1,2,3]
+_gpu_ids = [0]
 num_gpus = len(_gpu_ids)
 jobs_per_gpu = [[] for i in range(num_gpus)]
 
@@ -25,7 +25,7 @@ def run_jobs(jobs):
             process = subprocess.Popen(command.split(" "), stdout=f, stderr=subprocess.PIPE, universal_newlines=True)
             stdout, stderr = process.communicate()
 
-        #print(stderr)
+        print(stderr)
 
 
 train_state_list = [
@@ -47,8 +47,8 @@ for train_state in train_state_list:
         "log_name": "log.txt",
         "learning_rate": 0.001,
         "loss": "crossentropy",
-        "batch_size": 16,
-        "time_budget": 3600*5,
+        "batch_size": 32,
+        "time_budget": 3600*6,
         "model_type": "unet_large"
     }
 

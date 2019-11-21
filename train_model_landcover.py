@@ -185,7 +185,7 @@ def main():
         validation_data=validation_generator,
         validation_steps=validation_steps_per_epoch,
         max_queue_size=256,
-        workers=8,
+        workers=4,
         use_multiprocessing=True,
         callbacks=[
             validation_callback,
