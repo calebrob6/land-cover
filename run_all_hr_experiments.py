@@ -6,10 +6,11 @@ import subprocess
 import multiprocessing
 
 
-DATASET_DIR = "/media/disk2/caleb/chesapeake_data/"
-OUTPUT_DIR = "results_run_single/"
+DATASET_DIR = "/data/caleb/cvpr_landcover_datasets/"
+OUTPUT_DIR = "results/results_epochs_20_4/"
+TIMEOUT = 3600 * 3
 
-_gpu_ids = [0]
+_gpu_ids = [0,1,2]
 num_gpus = len(_gpu_ids)
 jobs_per_gpu = [[] for i in range(num_gpus)]
 
@@ -21,19 +22,22 @@ def run_jobs(jobs):
         output_dir = os.path.join(args["output"], args["exp_name"])
         os.makedirs(output_dir, exist_ok=True)
 
-        with open(os.path.join(output_dir, args["log_name"]), 'w') as f:
-            process = subprocess.Popen(command.split(" "), stdout=f, stderr=subprocess.PIPE, universal_newlines=True)
-            stdout, stderr = process.communicate()
+        process = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=2**20)
+        output, error = process.communicate()
 
-        print(stderr)
+        with open(os.path.join(output_dir, args["log_name"]), 'w') as f:
+            f.write(output.decode('utf-8'))
 
 
 train_state_list = [
     "de_1m_2013", "ny_1m_2013", "md_1m_2013", "pa_1m_2013", "va_1m_2014", "wv_1m_2014"
 ]
+test_state_list = [
+    "de_1m_2013", "ny_1m_2013", "md_1m_2013", "pa_1m_2013", "va_1m_2014", "wv_1m_2014"
+]
+
 gpu_idx = 0
 for train_state in train_state_list:
-
     gpu_id = _gpu_ids[gpu_idx]
 
     args = {
@@ -47,8 +51,8 @@ for train_state in train_state_list:
         "log_name": "log.txt",
         "learning_rate": 0.001,
         "loss": "crossentropy",
-        "batch_size": 32,
-        "time_budget": 3600*6,
+        "batch_size": 16,
+        "time_budget": TIMEOUT,
         "model_type": "unet_large"
     }
 
@@ -70,7 +74,7 @@ for train_state in train_state_list:
     jobs_per_gpu[gpu_idx].append((command_train, args))
     
 
-    for test_state in train_state_list:
+    for test_state in test_state_list:
 
         args = {
             "test_csv": "{}/{}_extended-test_tiles.csv".format(DATASET_DIR, test_state),
@@ -89,6 +93,8 @@ for train_state in train_state_list:
         jobs_per_gpu[gpu_idx].append((command_test, args))
         
 
+        
+        args = args.copy()
         args["log_name"] = "log_acc_{}.txt".format(test_state)
         command_acc = (
             "python compute_accuracy.py "

@@ -163,7 +163,7 @@ def main():
         naip_tile = np.rollaxis(naip_tile, 0, 3)
         naip_fid.close()
 
-        output = run_model_on_tile(model, naip_tile, model_input_size, output_shape[2], 32)
+        output = run_model_on_tile(model, naip_tile, model_input_size, output_shape[2], 16)
         #output[:,:,4] += output[:,:,5]
         #output[:,:,4] += output[:,:,6]
         output = output[:,:,:5]
