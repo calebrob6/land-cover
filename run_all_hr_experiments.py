@@ -7,10 +7,10 @@ import multiprocessing
 
 
 DATASET_DIR = "/data/caleb/cvpr_landcover_datasets/"
-OUTPUT_DIR = "results/results_epochs_20_4/"
+OUTPUT_DIR = "results/results_epochs_20_5/"
 TIMEOUT = 3600 * 3
 
-_gpu_ids = [0,1,2]
+_gpu_ids = [0,1]
 num_gpus = len(_gpu_ids)
 jobs_per_gpu = [[] for i in range(num_gpus)]
 
@@ -22,11 +22,13 @@ def run_jobs(jobs):
         output_dir = os.path.join(args["output"], args["exp_name"])
         os.makedirs(output_dir, exist_ok=True)
 
-        process = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=2**20)
-        output, error = process.communicate()
-
+        process = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0)
+        
         with open(os.path.join(output_dir, args["log_name"]), 'w') as f:
-            f.write(output.decode('utf-8'))
+            while process.returncode is None:
+                for line in process.stdout:
+                    f.write(line.decode('utf-8').strip() + "\n")
+                process.poll()
 
 
 train_state_list = [
@@ -57,7 +59,7 @@ for train_state in train_state_list:
     }
 
     command_train = (
-        "python train_model_landcover.py "
+        "python -u train_model_landcover.py "
         "--output {output} "
         "--name {exp_name} "
         "--gpu {gpu} "
@@ -84,7 +86,7 @@ for train_state in train_state_list:
             "log_name": "log_test_{}.txt".format(test_state)
         }
         command_test = (
-            "python test_model_landcover.py "
+            "python -u test_model_landcover.py "
             "--input {test_csv} "
             "--output {output}/{exp_name}/ "
             "--model {output}/final_model.h5 "
@@ -97,7 +99,7 @@ for train_state in train_state_list:
         args = args.copy()
         args["log_name"] = "log_acc_{}.txt".format(test_state)
         command_acc = (
-            "python compute_accuracy.py "
+            "python -u compute_accuracy.py "
             "--input {test_csv} "
             "--output {output}/{exp_name}/"
         ).format(**args)
