@@ -180,7 +180,8 @@ def main():
     model.fit_generator(
         training_generator,
         steps_per_epoch=training_steps_per_epoch,
-        epochs=10**6,
+        #epochs=10**6,
+        epochs=20,
         verbose=verbose,
         validation_data=validation_generator,
         validation_steps=validation_steps_per_epoch,
@@ -206,6 +207,8 @@ def main():
     model.save_weights(os.path.join(log_dir, "final_model_weights.h5"))
 
     print("Finished in %0.4f seconds" % (time.time() - start_time))
+    del model, training_generator, validation_generator
 
 if __name__ == "__main__":
     main()
+    sys.exit(0)
