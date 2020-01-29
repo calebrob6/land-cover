@@ -69,6 +69,7 @@ def do_args(arg_list, name):
         choices=["unet", "unet_large", "fcdensenet", "fcn_small"], \
         help="Model architecture to use", required=True
     )
+    parser.add_argument("--epochs", action="store", type=int, help="Number of epochs", default=100)
     parser.add_argument("--learning_rate", action="store", type=float, help="Learning rate", default=0.001)
     parser.add_argument("--loss", action="store", type=str, help="Loss function", \
         choices=["crossentropy", "jaccard", "superres"], required=True)
@@ -92,6 +93,7 @@ def main():
     validation_states = args.validation_states
     superres_states = args.superres_states
 
+    num_epochs = args.epochs
     model_type = args.model_type
     batch_size = args.batch_size
     learning_rate = args.learning_rate
@@ -181,7 +183,7 @@ def main():
         training_generator,
         steps_per_epoch=training_steps_per_epoch,
         #epochs=10**6,
-        epochs=20,
+        epochs=num_epochs,
         verbose=verbose,
         validation_data=validation_generator,
         validation_steps=validation_steps_per_epoch,
