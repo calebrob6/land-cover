@@ -1,0 +1,1 @@
+sudo pkill -e -f "train_model_landcover.py"
