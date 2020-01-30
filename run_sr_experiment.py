@@ -58,7 +58,7 @@ for test_state in test_state_list:
     }
 
     command_train = (
-        "python3 -u train_model_landcover.py "
+        "python3 train_model_landcover.py "
         "--output {output} "
         "--name {exp_name} "
         "--gpu {gpu} "
@@ -84,7 +84,7 @@ for test_state in test_state_list:
         "log_name": "log_test_{}.txt".format(test_state)
     }
     command_test = (
-        "python3 -u test_model_landcover.py "
+        "python3 test_model_landcover.py "
         "--input {test_csv} "
         "--output {output}/{exp_name}/ "
         "--model {output}/final_model.h5 "
@@ -98,7 +98,7 @@ for test_state in test_state_list:
     args = args.copy()
     args["log_name"] = "log_acc_{}.txt".format(test_state)
     command_acc = (
-        "python3 -u compute_accuracy.py "
+        "python3 compute_accuracy.py "
         "--input {test_csv} "
         "--output {output}/{exp_name}/"
     ).format(**args)
