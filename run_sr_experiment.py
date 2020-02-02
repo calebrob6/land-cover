@@ -6,7 +6,7 @@ import subprocess
 import multiprocessing
 
 
-DATASET_DIR = "/data/caleb/cvpr_landcover_datasets/"
+DATASET_DIR = "/media/disk2/cvpr_landcover_datasets/"
 OUTPUT_DIR = "results/results_sr_epochs_100_0/"
 TIMEOUT = 3600 * 12
 
@@ -32,7 +32,7 @@ def run_jobs(jobs):
 
 
 
-train_state = "de_1m_2013"
+train_state = "md_1m_2013"
 test_state_list = [
     "de_1m_2013", "ny_1m_2013", "md_1m_2013", "pa_1m_2013", "va_1m_2014", "wv_1m_2014"
 ]
