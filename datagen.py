@@ -58,7 +58,9 @@ class DataGenerator(keras.utils.Sequence):
         
         for i, (fn, state) in enumerate(fns):
             if fn.endswith(".npz"):
-                data = np.load(fn)["arr_0"].squeeze()
+                dl = np.load(fn)
+                data = dl["arr_0"].squeeze()
+                dl.close()
             elif fn.endswith(".npy"):
                 data = np.load(fn).squeeze()
             data = np.rollaxis(data, 0, 3)

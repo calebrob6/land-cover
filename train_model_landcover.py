@@ -173,7 +173,7 @@ def main():
         verbose=verbose,
         save_best_only=False,
         save_weights_only=False,
-        period=1
+        period=20
     )
 
     training_generator = datagen.DataGenerator(training_patches, batch_size, training_steps_per_epoch, 240, 240, 4, do_color_aug=do_color_aug, do_superres=do_superres, superres_only_states=superres_states)
@@ -188,7 +188,7 @@ def main():
         validation_data=validation_generator,
         validation_steps=validation_steps_per_epoch,
         max_queue_size=256,
-        workers=4,
+        workers=5,
         use_multiprocessing=True,
         callbacks=[
             validation_callback,

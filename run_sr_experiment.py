@@ -10,7 +10,7 @@ DATASET_DIR = "/media/disk2/datasets/chesapeake_data/"
 OUTPUT_DIR = "results/results_sr_epochs_100_0/"
 TIMEOUT = 3600 * 12
 
-_gpu_ids = [0,1,2,3]
+_gpu_ids = [0,1,2]
 num_gpus = len(_gpu_ids)
 jobs_per_gpu = [[] for i in range(num_gpus)]
 
