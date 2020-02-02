@@ -116,8 +116,8 @@ def make_model(inputs, outputs, optimizer, loss):
                 "outputs_sr": sr_loss(nlcd_class_weights, nlcd_means, nlcd_vars)
             },
             loss_weights={
-                "outputs_hr": (199.0/200.0),
-                "outputs_sr": (1.0/200.0)
+                "outputs_hr": (39.0/40.0),
+                "outputs_sr": (1.0/40.0)
             },
             metrics={
                 "outputs_hr": accuracy

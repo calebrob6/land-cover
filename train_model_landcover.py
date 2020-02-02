@@ -154,7 +154,7 @@ def main():
 
 
     # Build the model
-    optimizer = Adam(learning_rate)
+    optimizer = RMSprop(learning_rate)
     if model_type == "unet":
         model = models.unet((240,240,4), 5, optimizer, loss)
     elif model_type == "unet_large":
