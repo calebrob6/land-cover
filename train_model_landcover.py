@@ -46,7 +46,7 @@ import utils
 import models
 import datagen
 
-from keras.optimizers import RMSprop
+from keras.optimizers import RMSprop, Adam
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 
 def do_args(arg_list, name):
@@ -154,7 +154,7 @@ def main():
 
 
     # Build the model
-    optimizer = RMSprop(learning_rate)
+    optimizer = Adam(learning_rate)
     if model_type == "unet":
         model = models.unet((240,240,4), 5, optimizer, loss)
     elif model_type == "unet_large":
