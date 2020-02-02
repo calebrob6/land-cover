@@ -6,11 +6,11 @@ import subprocess
 import multiprocessing
 
 
-DATASET_DIR = "/media/disk2/cvpr_landcover_datasets/"
+DATASET_DIR = "/media/disk2/datasets/chesapeake_data/"
 OUTPUT_DIR = "results/results_sr_epochs_100_0/"
 TIMEOUT = 3600 * 12
 
-_gpu_ids = [0,1]
+_gpu_ids = [0]
 num_gpus = len(_gpu_ids)
 jobs_per_gpu = [[] for i in range(num_gpus)]
 
@@ -58,7 +58,7 @@ for test_state in test_state_list:
     }
 
     command_train = (
-        "python3 train_model_landcover.py "
+        "python train_model_landcover.py "
         "--output {output} "
         "--name {exp_name} "
         "--gpu {gpu} "
@@ -84,7 +84,7 @@ for test_state in test_state_list:
         "log_name": "log_test_{}.txt".format(test_state)
     }
     command_test = (
-        "python3 test_model_landcover.py "
+        "python test_model_landcover.py "
         "--input {test_csv} "
         "--output {output}/{exp_name}/ "
         "--model {output}/final_model.h5 "
@@ -98,7 +98,7 @@ for test_state in test_state_list:
     args = args.copy()
     args["log_name"] = "log_acc_{}.txt".format(test_state)
     command_acc = (
-        "python3 compute_accuracy.py "
+        "python compute_accuracy.py "
         "--input {test_csv} "
         "--output {output}/{exp_name}/"
     ).format(**args)
