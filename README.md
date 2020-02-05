@@ -44,6 +44,14 @@ Pre-trained keras models were generated with Python 3.6. See `requirements.txt` 
 - shapely
 - rasterio
 
+### Install azcopy
+```
+wget https://aka.ms/downloadazcopy-v10-linux
+tar -xvf downloadazcopy-v10-linux
+sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
+```
+Only works with `sudo azcopy`.
+
 ## References
 
 Please cite the following papers if you use this work:
