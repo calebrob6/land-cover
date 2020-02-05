@@ -6,7 +6,7 @@ import subprocess
 import multiprocessing
 
 
-DATASET_DIR = "/data/caleb/cvpr_landcover_datasets/"
+DATASET_DIR = "chesapeake_data/"
 OUTPUT_DIR = "results/results_epochs_20_5/"
 TIMEOUT = 3600 * 3
 
@@ -18,12 +18,12 @@ def run_jobs(jobs):
     print("Starting job runner")
     for (command, args) in jobs:
         print(datetime.datetime.now(), command)
-        
+
         output_dir = os.path.join(args["output"], args["exp_name"])
         os.makedirs(output_dir, exist_ok=True)
 
         process = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0)
-        
+
         with open(os.path.join(output_dir, args["log_name"]), 'w') as f:
             while process.returncode is None:
                 for line in process.stdout:
@@ -74,7 +74,7 @@ for train_state in train_state_list:
         "--time_budget {time_budget}"
     ).format(**args)
     jobs_per_gpu[gpu_idx].append((command_train, args))
-    
+
 
     for test_state in test_state_list:
 
@@ -93,9 +93,9 @@ for train_state in train_state_list:
             "--gpu {gpu}"
         ).format(**args)
         jobs_per_gpu[gpu_idx].append((command_test, args))
-        
 
-        
+
+
         args = args.copy()
         args["log_name"] = "log_acc_{}.txt".format(test_state)
         command_acc = (
