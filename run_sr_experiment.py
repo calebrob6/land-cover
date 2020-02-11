@@ -6,7 +6,7 @@ import subprocess
 import multiprocessing
 
 
-DATASET_DIR = "/media/disk2/datasets/chesapeake_data/"
+DATASET_DIR = "chesapeake_data/"
 OUTPUT_DIR = "results/results_sr_epochs_100_0/"
 TIMEOUT = 3600 * 12
 

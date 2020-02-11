@@ -30,12 +30,19 @@ def run_jobs(jobs):
                     f.write(line.decode('utf-8').strip() + "\n")
                 process.poll()
 
-
+"""
 train_state_list = [
     "de_1m_2013", "ny_1m_2013", "md_1m_2013", "pa_1m_2013", "va_1m_2014", "wv_1m_2014"
 ]
 test_state_list = [
     "de_1m_2013", "ny_1m_2013", "md_1m_2013", "pa_1m_2013", "va_1m_2014", "wv_1m_2014"
+]
+"""
+train_state_list = [
+    "ny_1m_2013"
+]
+test_state_list = [
+    "ny_1m_2013"
 ]
 
 gpu_idx = 0
@@ -74,8 +81,8 @@ for train_state in train_state_list:
         "--time_budget {time_budget}"
     ).format(**args)
     jobs_per_gpu[gpu_idx].append((command_train, args))
-
-
+    
+  
     for test_state in test_state_list:
 
         args = {
@@ -104,9 +111,12 @@ for train_state in train_state_list:
             "--output {output}/{exp_name}/"
         ).format(**args)
         jobs_per_gpu[gpu_idx].append((command_acc, args))
+        
+        break
 
 
     gpu_idx = (gpu_idx + 1) % num_gpus
+    break
 
 
 pool_sz = num_gpus
