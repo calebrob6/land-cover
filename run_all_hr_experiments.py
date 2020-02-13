@@ -8,7 +8,6 @@ import multiprocessing
 
 DATASET_DIR = "chesapeake_data/"
 OUTPUT_DIR = "results/results_epochs_20_5/"
-TIMEOUT = 3600 * 3
 
 _gpu_ids = [0,1]
 num_gpus = len(_gpu_ids)
@@ -53,7 +52,6 @@ for train_state in train_state_list:
         "learning_rate": 0.001,
         "loss": "crossentropy",
         "batch_size": 16,
-        "time_budget": TIMEOUT,
         "model_type": "unet_large"
     }
 
@@ -70,7 +68,6 @@ for train_state in train_state_list:
         "--learning_rate {learning_rate} "
         "--loss {loss} "
         "--batch_size {batch_size} "
-        "--time_budget {time_budget}"
     ).format(**args)
     jobs_per_gpu[gpu_idx].append((command_train, args))
 
