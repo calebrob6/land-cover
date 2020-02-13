@@ -44,6 +44,14 @@ Pre-trained keras models were generated with Python 3.6. See `requirements.txt` 
 - shapely
 - rasterio
 
+### Install azcopy
+```
+wget https://aka.ms/downloadazcopy-v10-linux
+tar -xvf downloadazcopy-v10-linux
+sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
+```
+Only works with `sudo azcopy`.
+
 ## References
 
 Please cite the following papers if you use this work:
@@ -69,6 +77,5 @@ Please cite the following papers if you use this work:
 ## Todo
 
 - Change `train_model_landcover.py` to save models without the superres loss, jaccard loss, or Lambda layers as these can cause problems with saving/loading in different versions.
-- Re-write `eval_landcover_results.sh` in Python.
 - Create a test script that computes accuracy on the fly without saving model results.
 - Make it easy to target other label sets (e.g instead of 4-class classification).

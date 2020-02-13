@@ -33,8 +33,8 @@ MODEL_FN_INST=${MODEL_FN%.*}
 
 EXP_NAME=CVPR-for_github-loss-${LOSS}-model-${MODEL_TYPE}-training_states-${TRAIN_STATE_LIST// /-}
 EXP_NAME_OUT=${EXP_NAME}-instance-${MODEL_FN_INST}
-OUTPUT=/mnt/blobfuse/train-output/ForCVPR
-PRED_OUTPUT=/mnt/blobfuse/pred-output/ForCVPR
+OUTPUT=/results/train-output/
+PRED_OUTPUT=/results/pred-output/
 
 if [ ! -f "${OUTPUT}/${EXP_NAME}/${MODEL_FN}" ]; then
     echo "This experiment hasn't been trained! Exiting..."
