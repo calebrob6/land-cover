@@ -77,6 +77,5 @@ Please cite the following papers if you use this work:
 ## Todo
 
 - Change `train_model_landcover.py` to save models without the superres loss, jaccard loss, or Lambda layers as these can cause problems with saving/loading in different versions.
-- Re-write `eval_landcover_results.sh` in Python.
 - Create a test script that computes accuracy on the fly without saving model results.
 - Make it easy to target other label sets (e.g instead of 4-class classification).
