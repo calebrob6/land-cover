@@ -35,7 +35,7 @@ SUPERRES_STATE_LIST="ny_1m_2013"
 
 
 EXP_NAME=CVPR-for_github-loss-${LOSS}-model-${MODEL_TYPE}-training_states-${TRAIN_STATE_LIST// /-}
-OUTPUT=/mnt/blobfuse/train-output/ForCVPR
+OUTPUT=/results/train-output/
 
 if [ -d "${OUTPUT}/${EXP_NAME}" ]; then
     echo "Experiment ${OUTPUT}/${EXP_NAME} exists"
