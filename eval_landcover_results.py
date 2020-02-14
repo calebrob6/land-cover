@@ -1,5 +1,11 @@
+import os
 import argparse
+
 import numpy as np
+
+from landcover.helpers import get_logger
+
+logger = get_logger(__name__)
 
 TEST_SPLITS=[
     "de_1m_2013",
@@ -27,10 +33,10 @@ def eval_landcover_results(acc_file):
     with open(acc_file,"r") as src:
         lines = src.readlines()
         # All
-        print("Accuracy and jaccard of all pixels")
+        logger.info("Accuracy and jaccard of all pixels")
         all_acc, all_jac = accuracy_jaccard(lines)
         # NLCD
-        print("Accuracy and jaccard of pixels with developed NLCD classes")
+        logger.info("Accuracy and jaccard of pixels with developed NLCD classes")
         dev_acc, dev_jac = accuracy_jaccard(lines,s=-4,f=None)
     return all_acc, all_jac, dev_acc, dev_jac
 
@@ -45,7 +51,7 @@ def accuracy_jaccard(lines, s=-8, f=-4):
     for c in range(len(lines_8)):
         j += arr[c,c] / np.sum(arr[c,:] + arr[:,c])
     jaccard = j / len(lines_8)
-    print("Accuracy: %.6f, Jaccard: %.6f" % (acc,jaccard))
+    logger.info("Accuracy: %.6f, Jaccard: %.6f" % (acc,jaccard))
     return acc, jaccard
 
 
@@ -56,9 +62,13 @@ def process_line(lines):
     return np.squeeze(np.array(eval(str_list)))
 
 
-def eval_all_landcover_results(test_splits=TEST_SPLITS, exp_base = EXP_BASE,sr_hr="sr"):
+def eval_all_landcover_results(test_splits=TEST_SPLITS, exp_base=EXP_BASE, sr_hr="sr"):
     for split in test_splits:
-        eval_landcover_results(exp_base + "train-hr_%s_train-%s_%s/" % (split,sr_hr,split) + "/test-output_%s/log_acc_%s.txt" % (split,split))
+        acc_file_path = os.path.join(exp_base, "train-hr_%s_train-%s_%s/" % (split, sr_hr, split), "test-output_%s/log_acc_%s.txt" % (split, split))
+        try:
+            eval_landcover_results(acc_file_path)
+        except FileNotFoundError:
+            logger.debug("Could not find %s - continuing with next file", acc_file_path)
 
 
 def main():
