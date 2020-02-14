@@ -211,6 +211,7 @@ def main():
     print("Finished in %0.4f seconds" % (time.time() - start_time))
     del model, training_generator, validation_generator
 
+
 if __name__ == "__main__":
     main()
     sys.exit(0)

@@ -1,12 +1,12 @@
-'''Heavily modified from https://github.com/pietz/unet-keras'''
+"""Heavily modified from https://github.com/pietz/unet-keras"""
 import keras.backend as K
 from keras.models import Input, Model
 from keras.layers import Conv2D, Concatenate, MaxPooling2D, Conv2DTranspose, Activation
 from keras.layers import UpSampling2D, Dropout, BatchNormalization
 
-#------------------
+# ------------------
 # TODO: implement different parameters in the unet and dense blocks
-#------------------
+# ------------------
 
 
 def conv_bn_relu(m, dim):
@@ -14,7 +14,6 @@ def conv_bn_relu(m, dim):
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     return x
-
 
 
 def unet_block(m, dim, res=False):
@@ -55,9 +54,9 @@ def level_block_fixed_dims(m, dims, depth, acti, do, bn, mp, up, res, dense=Fals
 
 def UNet(img_shape, dims=[32, 64, 128, 256, 128], out_ch=1, activation='relu', dropout=False, batchnorm=True, maxpool=True, upconv=True, residual=False):
     i = Input(shape=img_shape)
-	o = level_block_fixed_dims(i, dims, len(dims)-1, activation, dropout, batchnorm, maxpool, upconv, residual, dense=False)
-	o = Conv2D(out_ch, 1, activation=None, name="logits")(o)
-	return i, o
+    o = level_block_fixed_dims(i, dims, len(dims)-1, activation, dropout, batchnorm, maxpool, upconv, residual, dense=False)
+    o = Conv2D(out_ch, 1, activation=None, name="logits")(o)
+    return i, o
 
 
 def FC_DenseNet(img_shape, dims=[32, 16, 16, 16, 16], out_ch=1, activation='relu', dropout=False, batchnorm=True, maxpool=True, upconv=True, residual=False):

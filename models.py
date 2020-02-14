@@ -25,15 +25,15 @@ def accuracy(y_true, y_pred):
 
 
 def hr_loss(boundary=0):
-    '''The first channel of y_true should be all 1's if we want to use hr_loss, or all 0's if we don't want to use hr_loss
-    '''
+    """The first channel of y_true should be all 1's if we want to use hr_loss, or all 0's if we don't want to use hr_loss
+    """
     def loss(y_true, y_pred):
         return categorical_crossentropy(y_true[:,:,:,1:], y_pred[:,:,:,1:]) * y_true[:,:,:,0]
     return loss
 
 
 def sr_loss(nlcd_class_weights, nlcd_means, nlcd_vars, boundary=0):
-    '''Calculate superres loss according to ICLR paper'''
+    """Calculate superres loss according to ICLR paper"""
 
     def ddist(prediction, c_interval_center, c_interval_radius):
         return K.relu(K.abs(prediction - c_interval_center) - c_interval_radius)
