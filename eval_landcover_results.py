@@ -11,6 +11,7 @@ TEST_SPLITS=[
 ]
 EXP_BASE="~/land-cover/results/results_sr_epochs_100_0/"
 
+
 def do_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--test-splits", nargs='+', default=TEST_SPLITS,
@@ -20,6 +21,7 @@ def do_args():
         help="Base directory where experiments were saved."
     )
     return parser.parse_args()
+
 
 def eval_landcover_results(acc_file):
     with open(acc_file,"r") as src:
@@ -31,6 +33,7 @@ def eval_landcover_results(acc_file):
         print("Accuracy and jaccard of pixels with developed NLCD classes")
         dev_acc, dev_jac = accuracy_jaccard(lines,s=-4,f=None)
     return all_acc, all_jac, dev_acc, dev_jac
+
 
 def accuracy_jaccard(lines, s=-8, f=-4):
     lines_8 = lines[s:f]
@@ -45,20 +48,24 @@ def accuracy_jaccard(lines, s=-8, f=-4):
     print("Accuracy: %.6f, Jaccard: %.6f" % (acc,jaccard))
     return acc, jaccard
 
+
 def process_line(lines):
     str_list = "".join(lines)
     str_list = str_list.replace(" ", ",")
     str_list = str_list.replace("\n", ",")
     return np.squeeze(np.array(eval(str_list)))
 
+
 def eval_all_landcover_results(test_splits=TEST_SPLITS, exp_base = EXP_BASE,sr_hr="sr"):
     for split in test_splits:
         eval_landcover_results(exp_base + "train-hr_%s_train-%s_%s/" % (split,sr_hr,split) + "/test-output_%s/log_acc_%s.txt" % (split,split))
+
 
 def main():
     args = do_args()
     print(args.test_splits)
     eval_all_landcover_results(args.test_splits, args.exp_base)
+
 
 if __name__ == "__main__":
     main()

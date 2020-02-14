@@ -30,6 +30,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 #---------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
+
 def do_args(arg_list, name):
     parser = argparse.ArgumentParser(description=name)
 
@@ -42,6 +43,7 @@ def do_args(arg_list, name):
 
     return parser.parse_args(arg_list)
 
+
 def bounds_intersection(bound0, bound1):
     left0, bottom0, right0, top0 = bound0
     left1, bottom1, right1, top1 = bound1
@@ -50,12 +52,14 @@ def bounds_intersection(bound0, bound1):
             min([right0, right1]), min([top0, top1])
     return (left, bottom, right, top)
 
+
 def get_confusion_matrix(lc_vec, pred_vec):
     cnf = np.zeros((4,4), dtype=int)
     for j in range(0,4):
         for k in range(0,4):
             cnf[j,k] = ((lc_vec==j+1) & (pred_vec==k+1)).sum()
     return cnf
+
 
 def main():
     program_name = "Accuracy computing script"
@@ -130,6 +134,7 @@ def main():
     print(acc_sum/acc_num)
     print(cm)
     print(cm_dev)
+
 
 if __name__ == "__main__":
     main()

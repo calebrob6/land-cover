@@ -8,17 +8,21 @@ from keras.layers import UpSampling2D, Dropout, BatchNormalization
 # TODO: implement different parameters in the unet and dense blocks
 #------------------
 
+
 def conv_bn_relu(m, dim):
     x = Conv2D(dim, 3, activation=None, padding='same')(m)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     return x
 
+
+
 def unet_block(m, dim, res=False):
     x = m
     for i in range(3):
         x = conv_bn_relu(x, dim)
     return Concatenate()([m, x]) if res else x
+
 
 def dense_block(m, dim):
     x = m
@@ -28,6 +32,7 @@ def dense_block(m, dim):
         x = Concatenate()([conv, x])
         outputs.append(conv)
     return Concatenate()(outputs)
+
 
 def level_block_fixed_dims(m, dims, depth, acti, do, bn, mp, up, res, dense=False):
     max_depth = len(dims)-1
@@ -47,17 +52,20 @@ def level_block_fixed_dims(m, dims, depth, acti, do, bn, mp, up, res, dense=Fals
         m = dense_block(m, dim) if dense else unet_block(m, dim, res)
     return m
 
+
 def UNet(img_shape, dims=[32, 64, 128, 256, 128], out_ch=1, activation='relu', dropout=False, batchnorm=True, maxpool=True, upconv=True, residual=False):
-	i = Input(shape=img_shape)
+    i = Input(shape=img_shape)
 	o = level_block_fixed_dims(i, dims, len(dims)-1, activation, dropout, batchnorm, maxpool, upconv, residual, dense=False)
 	o = Conv2D(out_ch, 1, activation=None, name="logits")(o)
 	return i, o
+
 
 def FC_DenseNet(img_shape, dims=[32, 16, 16, 16, 16], out_ch=1, activation='relu', dropout=False, batchnorm=True, maxpool=True, upconv=True, residual=False):
     i = Input(shape=img_shape)
     o = level_block_fixed_dims(i, dims, len(dims)-1, activation, dropout, batchnorm, maxpool, upconv, residual, dense=True)
     o = Conv2D(out_ch, 1, activation=None, name="logits")(o)
     return i, o
+
 
 def FCN_Small(img_shape, out_ch):
     i = Input(shape=img_shape)
@@ -67,6 +75,7 @@ def FCN_Small(img_shape, out_ch):
         x = conv_bn_relu(x, 64)
     o = Conv2D(out_ch, 1, activation=None, name="logits")(x)
     return i, o
+
 
 if __name__ == "__main__":
     K.clear_session()

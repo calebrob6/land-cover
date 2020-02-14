@@ -4,6 +4,7 @@ import keras.utils
 
 from utils import nlcd_classes_to_idx
 
+
 def color_aug(colors):
     n_ch = colors.shape[0]
     contra_adj = 0.05
@@ -16,6 +17,7 @@ def color_aug(colors):
 
     colors = (colors - ch_mean) * contra_mul + ch_mean * bright_mul
     return colors
+
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
@@ -41,7 +43,7 @@ class DataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
 
     def __len__(self):
-        'Denotes the number of batches per epoch'
+        """Denotes the number of batches per epoch"""
         return self.steps_per_epoch
 
     def __getitem__(self, index):
@@ -73,7 +75,6 @@ class DataGenerator(keras.utils.Sequence):
                 y_idx = np.random.randint(0, data_size - self.input_size)
                 data = data[y_idx:y_idx+self.input_size, x_idx:x_idx+self.input_size, :]
 
-            
             # setup x
             if self.do_color_aug:
                 x_batch[i] = color_aug(data[:,:,:4] / 255.0)
