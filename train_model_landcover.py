@@ -105,7 +105,7 @@ def main():
     log_dir = os.path.join(output, name)
 
     if not os.path.exists(log_dir):
-        mkdir(log_dir)
+        os.mkdir(log_dir)
 
     f = open(os.path.join(log_dir, "args.txt"), "w")
     for k,v in args.__dict__.items():
