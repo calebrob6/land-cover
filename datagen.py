@@ -4,6 +4,7 @@ import keras.utils
 
 from utils import nlcd_classes_to_idx
 
+
 def color_aug(colors):
     n_ch = colors.shape[0]
     contra_adj = 0.05
@@ -17,11 +18,12 @@ def color_aug(colors):
     colors = (colors - ch_mean) * contra_mul + ch_mean * bright_mul
     return colors
 
+
 class DataGenerator(keras.utils.Sequence):
-    'Generates data for Keras'
+    """Generates data for Keras"""
     
     def __init__(self, patches, batch_size, steps_per_epoch, input_size, output_size, num_channels, do_color_aug=False, do_superres=False, superres_only_states=[]):
-        'Initialization'
+        """Initialization"""
 
         self.patches = patches
         self.batch_size = batch_size
@@ -41,11 +43,11 @@ class DataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
 
     def __len__(self):
-        'Denotes the number of batches per epoch'
+        """Denotes the number of batches per epoch"""
         return self.steps_per_epoch
 
     def __getitem__(self, index):
-        'Generate one batch of data'
+        """Generate one batch of data"""
         indices = self.indices[index*self.batch_size:(index+1)*self.batch_size]
 
         fns = [self.patches[i] for i in indices]
@@ -73,7 +75,6 @@ class DataGenerator(keras.utils.Sequence):
                 y_idx = np.random.randint(0, data_size - self.input_size)
                 data = data[y_idx:y_idx+self.input_size, x_idx:x_idx+self.input_size, :]
 
-            
             # setup x
             if self.do_color_aug:
                 x_batch[i] = color_aug(data[:,:,:4] / 255.0)
@@ -81,19 +82,19 @@ class DataGenerator(keras.utils.Sequence):
                 x_batch[i] = data[:,:,:4] / 255.0
 
             # setup y_highres
-            y_train_hr = data[:,:,8]
-            y_train_hr[y_train_hr==15] = 0
-            y_train_hr[y_train_hr==5] = 4
-            y_train_hr[y_train_hr==6] = 4
+            y_train_hr = data[:, :, 8]
+            y_train_hr[y_train_hr == 15] = 0
+            y_train_hr[y_train_hr == 5] = 4
+            y_train_hr[y_train_hr == 6] = 4
             y_train_hr = keras.utils.to_categorical(y_train_hr, 5)
 
             if self.do_superres:
                 if state in self.superres_only_states:
-                    y_train_hr[:,:,0] = 0
+                    y_train_hr[:, :, 0] = 0
                 else:
-                    y_train_hr[:,:,0] = 1
+                    y_train_hr[:, :, 0] = 1
             else:
-                y_train_hr[:,:,0] = 0
+                y_train_hr[:, :, 0] = 0
             y_hr_batch[i] = y_train_hr
             
             # setup y_superres
@@ -102,7 +103,6 @@ class DataGenerator(keras.utils.Sequence):
                 y_train_nlcd = keras.utils.to_categorical(y_train_nlcd, 22)
                 y_sr_batch[i] = y_train_nlcd
 
-        
         if self.do_superres:
             return x_batch.copy(), {"outputs_hr": y_hr_batch, "outputs_sr": y_sr_batch}
         else:

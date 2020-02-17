@@ -75,7 +75,6 @@ def do_args(arg_list, name):
         choices=["crossentropy", "jaccard", "superres"], required=True)
 
     parser.add_argument("--batch_size", action="store", type=eval, help="Batch size", default="128")
-    parser.add_argument("--time_budget", action="store", type=int, help="Time limit", default=3600*3)
 
     return parser.parse_args(arg_list)
 
@@ -97,14 +96,14 @@ def main():
     model_type = args.model_type
     batch_size = args.batch_size
     learning_rate = args.learning_rate
-    time_budget = args.time_budget
     loss = args.loss
     do_color_aug = args.color
     do_superres = loss == "superres"
 
     log_dir = os.path.join(output, name)
 
-    assert os.path.exists(log_dir), "Output directory doesn't exist"
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
 
     f = open(os.path.join(log_dir, "args.txt"), "w")
     for k,v in args.__dict__.items():
@@ -165,7 +164,7 @@ def main():
         model = models.fcn_small((240,240,4), 5, optimizer, loss)
     model.summary()
 
-    validation_callback = utils.LandcoverResults(log_dir=log_dir, time_budget=time_budget, verbose=verbose)
+    validation_callback = utils.LandcoverResults(log_dir=log_dir, verbose=verbose)
     learning_rate_callback = LearningRateScheduler(utils.schedule_stepped, verbose=verbose)
 
     model_checkpoint_callback = ModelCheckpoint(
@@ -210,6 +209,7 @@ def main():
 
     print("Finished in %0.4f seconds" % (time.time() - start_time))
     del model, training_generator, validation_generator
+
 
 if __name__ == "__main__":
     main()

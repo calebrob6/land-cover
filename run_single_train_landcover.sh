@@ -25,7 +25,6 @@ GPU_ID=0
 LOSS=${LOSSES[0]}
 MODEL_TYPE=${MODEL_TYPES[0]}
 
-((TIME_BUDGET=3600*12))
 BATCH_SIZE=16
 LEARNING_RATE=0.001
 
@@ -70,7 +69,6 @@ echo ${LOG_FILE}
 #     --learning_rate ${LEARNING_RATE} \
 #     --loss ${LOSS} \
 #     --batch_size ${BATCH_SIZE} \
-#     --time_budget ${TIME_BUDGET} \
 #     &> ${LOG_FILE} &
 
 # tail -f ${LOG_FILE}
@@ -87,8 +85,7 @@ python -u train_model_landcover.py \
     --model_type ${MODEL_TYPE} \
     --learning_rate ${LEARNING_RATE} \
     --loss ${LOSS} \
-    --batch_size ${BATCH_SIZE} \
-    --time_budget ${TIME_BUDGET}
+    --batch_size ${BATCH_SIZE}
 
 #wait;
 exit
