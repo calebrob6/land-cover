@@ -81,19 +81,16 @@ def find_key_by_str(keys, needle):
 
 class LandcoverResults(keras.callbacks.Callback):
 
-    def __init__(self, log_dir=None, time_budget=None, verbose=False, model=None):
+    def __init__(self, log_dir=None, verbose=False):
         
         self.mb_log_keys = None
         self.epoch_log_keys = None
 
         self.verbose = verbose
-        self.time_budget = time_budget
         self.log_dir = log_dir
 
         self.batch_num = 0
         self.epoch_num = 0
-
-        self.model_inst = model
 
         if self.log_dir is not None:
             self.train_mb_fn = os.path.join(log_dir, "minibatch_history.txt")
@@ -133,17 +130,6 @@ class LandcoverResults(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         t = time.time() - self.epoch_start_time
         total_time = time.time() - self.train_start_time
-
-        if self.time_budget is not None:
-            if total_time >= self.time_budget:
-                try:
-                    self.model.stop_training = True
-                except Exception:
-                    pass
-                try:
-                    self.model_inst.stop_training = True
-                except Exception:
-                    pass
 
         if self.epoch_log_keys is None and self.log_dir is not None:
             self.epoch_log_keys = [key for key in list(logs.keys()) if key!="epoch"]
