@@ -12,8 +12,10 @@ NLCD_CLASSES = [
 ]
 NLCD_CLASSES_TO_IDX_MAP = defaultdict(lambda: 0, {cl:i for i,cl in enumerate(NLCD_CLASSES)})
 
+
 def nlcd_classes_to_idx(nlcd):
     return np.vectorize(NLCD_CLASSES_TO_IDX_MAP.__getitem__)(np.squeeze(nlcd)).astype(np.uint8)
+
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -24,10 +26,12 @@ def humansize(nbytes):
     f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
     return '%s %s' % (f, suffixes[i])
 
+
 def schedule_decay(epoch, lr, decay=0.001):
     if epoch>=10:
         lr = lr * 1/(1 + decay * epoch)
     return lr
+
 
 def schedule_stepped(epoch, lr, step_size=10):
     if epoch > 0:
@@ -37,6 +41,7 @@ def schedule_stepped(epoch, lr, step_size=10):
             return lr
     else:
         return lr
+
 
 def load_nlcd_stats():
     nlcd_means = np.concatenate([np.zeros((22,1)),np.loadtxt("data/nlcd_mu.txt")], axis=1)
@@ -66,11 +71,13 @@ def load_nlcd_stats():
 
     return nlcd_class_weights, nlcd_means, nlcd_vars
 
+
 def find_key_by_str(keys, needle):
     for key in keys:
         if needle in key:
             return key
     raise ValueError("%s not found in keys" % (needle))
+
 
 class LandcoverResults(keras.callbacks.Callback):
 
@@ -91,7 +98,7 @@ class LandcoverResults(keras.callbacks.Callback):
 
     def on_train_begin(self, logs={}):
         self.train_start_time = time.time()
-        
+
     def on_batch_begin(self, batch, logs={}):
         self.mb_start_time = float(time.time())
 

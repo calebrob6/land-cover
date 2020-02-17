@@ -102,7 +102,8 @@ def main():
 
     log_dir = os.path.join(output, name)
 
-    assert os.path.exists(log_dir), "Output directory doesn't exist"
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
 
     f = open(os.path.join(log_dir, "args.txt"), "w")
     for k,v in args.__dict__.items():
@@ -208,6 +209,7 @@ def main():
 
     print("Finished in %0.4f seconds" % (time.time() - start_time))
     del model, training_generator, validation_generator
+
 
 if __name__ == "__main__":
     main()
