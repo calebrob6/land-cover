@@ -52,6 +52,17 @@ sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
 ```
 Only works with `sudo azcopy`.
 
+## Test
+
+Run all tests:
+```
+pytest --pylint
+```
+
+Format code:
+```
+black
+```
 ## References
 
 Please cite the following papers if you use this work:

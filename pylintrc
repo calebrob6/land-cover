@@ -1,0 +1,33 @@
+[MASTER]
+init-hook='import glob; [sys.path.append(d) for d in glob.glob("*/") if not d.startswith("_")]'
+
+[MESSAGE CONTROL]
+disable=
+    missing-docstring,
+    no-else-return,
+    too-few-public-methods,
+    missing-final-newline,
+    too-many-boolean-expressions,
+    unsubscriptable-object,
+    no-member,
+    fixme,
+    bad-continuation,
+    duplicate-code
+
+[FORMAT]
+max-line-length=120
+single-line-if-stmt=yes
+include-naming-hint=yes
+function-rgx=[a-z_][a-z0-9_]*$
+argument-rgx=[a-z_][a-z0-9_]*$
+variable-rgx=[a-z_][a-z0-9_]*$
+# "logger" and "api" are common module-level globals, and not true 'constants'
+const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__)|logger|api|_api)$
+
+[DESIGN]
+max-args=6
+ignored-argument-names=_.*|self
+
+[SIMILARITIES]
+# Minimum lines number of a similarity.
+min-similarity-lines=7

@@ -1,0 +1,2 @@
+id,naip-new_fn,naip-old_fn,lc_fn,nlcd_fn,landsat-leaf-on_fn,landsat-leaf-off_fn,buildings_fn
+0,test-test_tiles/m_3907833_nw_17_1_naip-new.tif,test-test_tiles/m_3907833_nw_17_1_naip-old.tif,test-test_tiles/m_3907833_nw_17_1_lc.tif,test-test_tiles/m_3907833_nw_17_1_nlcd.tif,test-test_tiles/m_3907833_nw_17_1_landsat-leaf-on.tif,test-test_tiles/m_3907833_nw_17_1_landsat-leaf-off.tif,test-test_tiles/m_3907833_nw_17_1_buildings.tif

@@ -9,15 +9,16 @@ import multiprocessing
 DATASET_DIR = "chesapeake_data/"
 OUTPUT_DIR = "results/results_sr_epochs_100_0/"
 
-_gpu_ids = [0,1,2]
+_gpu_ids = [0, 1, 2]
 num_gpus = len(_gpu_ids)
 jobs_per_gpu = [[] for i in range(num_gpus)]
+
 
 def run_jobs(jobs):
     print("Starting job runner")
     for (command, args) in jobs:
         print(datetime.datetime.now(), command)
-        
+
         output_dir = os.path.join(args["output"], args["exp_name"])
         os.makedirs(output_dir, exist_ok=True)
         os.system(command + " > %s 2>&1" % (os.path.join(output_dir, args["log_name"])))
@@ -31,10 +32,20 @@ def run_jobs(jobs):
 
 
 train_state_list = [
-    "de_1m_2013", "ny_1m_2013", "md_1m_2013", "pa_1m_2013", "va_1m_2014", "wv_1m_2014"
+    "de_1m_2013",
+    "ny_1m_2013",
+    "md_1m_2013",
+    "pa_1m_2013",
+    "va_1m_2014",
+    "wv_1m_2014",
 ]
 test_state_list = [
-    "de_1m_2013", "ny_1m_2013", "md_1m_2013", "pa_1m_2013", "va_1m_2014", "wv_1m_2014"
+    "de_1m_2013",
+    "ny_1m_2013",
+    "md_1m_2013",
+    "pa_1m_2013",
+    "va_1m_2014",
+    "wv_1m_2014",
 ]
 
 gpu_idx = 0
@@ -42,7 +53,12 @@ gpu_idx = 0
 for train_state in train_state_list:
     for test_state in test_state_list:
 
-        if not os.path.exists(os.path.join(OUTPUT_DIR,"train-hr_%s_train-sr_%s/final_model.h5" % (train_state, test_state))):
+        if not os.path.exists(
+            os.path.join(
+                OUTPUT_DIR,
+                "train-hr_%s_train-sr_%s/final_model.h5" % (train_state, test_state),
+            )
+        ):
             gpu_id = _gpu_ids[gpu_idx]
 
             args = {
@@ -51,13 +67,13 @@ for train_state in train_state_list:
                 "train_state_list": train_state,
                 "val_state_list": train_state,
                 "superres_state_list": test_state,
-                "gpu": gpu_id, 
+                "gpu": gpu_id,
                 "data_dir": DATASET_DIR,
                 "log_name": "log.txt",
                 "learning_rate": 0.001,
                 "loss": "superres",
                 "batch_size": 16,
-                "model_type": "unet_large"
+                "model_type": "unet_large",
             }
 
             command_train = (
@@ -76,14 +92,17 @@ for train_state in train_state_list:
                 "--batch_size {batch_size} "
             ).format(**args)
             jobs_per_gpu[gpu_idx].append((command_train, args))
-            
 
             args = {
-                "test_csv": "{}/{}_extended-test_tiles.csv".format(DATASET_DIR, test_state),
-                "output": "{}/train-hr_{}_train-sr_{}/".format(OUTPUT_DIR, train_state, test_state),
+                "test_csv": "{}/{}_extended-test_tiles.csv".format(
+                    DATASET_DIR, test_state
+                ),
+                "output": "{}/train-hr_{}_train-sr_{}/".format(
+                    OUTPUT_DIR, train_state, test_state
+                ),
                 "exp_name": "test-output_{}".format(test_state),
                 "gpu": gpu_id,
-                "log_name": "log_test_{}.txt".format(test_state)
+                "log_name": "log_test_{}.txt".format(test_state),
             }
             command_test = (
                 "python test_model_landcover.py "
@@ -94,9 +113,7 @@ for train_state in train_state_list:
                 "--superres"
             ).format(**args)
             jobs_per_gpu[gpu_idx].append((command_test, args))
-            
 
-            
             args = args.copy()
             args["log_name"] = "log_acc_{}.txt".format(test_state)
             command_acc = (
@@ -105,7 +122,6 @@ for train_state in train_state_list:
                 "--output {output}/{exp_name}/"
             ).format(**args)
             jobs_per_gpu[gpu_idx].append((command_acc, args))
-
 
             gpu_idx = (gpu_idx + 1) % num_gpus
         else:
