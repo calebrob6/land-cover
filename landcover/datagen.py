@@ -1,4 +1,3 @@
-from collections import defaultdict
 import numpy as np
 import keras.utils
 
@@ -26,6 +25,7 @@ def color_aug(colors):
 class DataGenerator(keras.utils.Sequence):
     """Generates data for Keras"""
 
+    # pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-locals
     def __init__(
         self,
         patches,
@@ -36,7 +36,7 @@ class DataGenerator(keras.utils.Sequence):
         num_channels,
         do_color_aug=False,
         do_superres=False,
-        superres_only_states=[],
+        superres_only_states=(),
     ):
         """Initialization"""
 

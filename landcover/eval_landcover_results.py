@@ -7,17 +7,17 @@ from landcover.helpers import get_logger
 
 logger = get_logger(__name__)
 
-TEST_SPLITS = [
+TEST_SPLITS = (
     "de_1m_2013",
     "ny_1m_2013",
     "md_1m_2013",
     "pa_1m_2013",
     "va_1m_2014",
     "wv_1m_2014",
-]
+)
 EXP_BASE = "~/land-cover/results/results_sr_epochs_100_0/"
 
-
+# pylint: disable=eval-used
 def do_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -57,7 +57,7 @@ def accuracy_jaccard(lines, s=-8, f=-4):
     for c in range(len(lines_8)):
         j += arr[c, c] / np.sum(arr[c, :] + arr[:, c])
     jaccard = j / len(lines_8)
-    logger.info("Accuracy: %.6f, Jaccard: %.6f" % (acc, jaccard))
+    logger.info("Accuracy: %.6f, Jaccard: %.6f", acc, jaccard)
     return acc, jaccard
 
 

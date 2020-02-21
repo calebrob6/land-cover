@@ -125,6 +125,7 @@ def find_key_by_str(keys, needle):
 
 
 class LandcoverResults(keras.callbacks.Callback):
+    # pylint: disable=too-many-instance-attributes,super-init-not-called,dangerous-default-value
     def __init__(self, log_dir=None, verbose=False):
 
         self.mb_log_keys = None
@@ -135,6 +136,10 @@ class LandcoverResults(keras.callbacks.Callback):
 
         self.batch_num = 0
         self.epoch_num = 0
+
+        self.train_start_time = None
+        self.mb_start_time = None
+        self.epoch_start_time = None
 
         if self.log_dir is not None:
             self.train_mb_fn = os.path.join(log_dir, "minibatch_history.txt")
@@ -151,7 +156,7 @@ class LandcoverResults(keras.callbacks.Callback):
 
         if self.mb_log_keys is None and self.log_dir is not None:
             self.mb_log_keys = [
-                key for key in list(logs.keys()) if key != "batch" and key != "size"
+                key for key in list(logs.keys()) if key not in ["batch", "size"]
             ]
             f = open(self.train_mb_fn, "w")
             f.write("Batch Number,Time Elapsed")
@@ -175,7 +180,7 @@ class LandcoverResults(keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         t = time.time() - self.epoch_start_time
-        total_time = time.time() - self.train_start_time
+        # total_time = time.time() - self.train_start_time
 
         if self.epoch_log_keys is None and self.log_dir is not None:
             self.epoch_log_keys = [key for key in list(logs.keys()) if key != "epoch"]

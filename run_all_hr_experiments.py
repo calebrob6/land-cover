@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 import os
 import datetime
 import subprocess
@@ -9,11 +8,11 @@ import multiprocessing
 DATASET_DIR = "chesapeake_data/"
 OUTPUT_DIR = "results/results_epochs_20_5/"
 
-_gpu_ids = [0, 1]
-num_gpus = len(_gpu_ids)
-jobs_per_gpu = [[] for i in range(num_gpus)]
+_GPU_IDS = [0, 1]
+NUM_GPUS = len(_GPU_IDS)
+JOBS_PER_GPU = [[] for i in range(NUM_GPUS)]
 
-
+# pylint: disable=redefined-outer-name
 def run_jobs(jobs):
     print("Starting job runner")
     for (command, args) in jobs:
@@ -36,7 +35,7 @@ def run_jobs(jobs):
                 process.poll()
 
 
-train_state_list = [
+TRAIN_STATE_LIST = [
     "de_1m_2013",
     "ny_1m_2013",
     "md_1m_2013",
@@ -44,7 +43,7 @@ train_state_list = [
     "va_1m_2014",
     "wv_1m_2014",
 ]
-test_state_list = [
+TEST_STATE_LIST = [
     "de_1m_2013",
     "ny_1m_2013",
     "md_1m_2013",
@@ -53,14 +52,14 @@ test_state_list = [
     "wv_1m_2014",
 ]
 
-gpu_idx = 0
-for train_state in train_state_list:
-    gpu_id = _gpu_ids[gpu_idx]
+GPU_IDX = 0
+for train_state in TRAIN_STATE_LIST:
+    gpu_id = _GPU_IDS[GPU_IDX]
 
     args = {
         "output": OUTPUT_DIR,
         "exp_name": "train-output_%s" % (train_state),
-        "train_state_list": train_state,
+        "TRAIN_STATE_LIST": train_state,
         "val_state_list": train_state,
         "superres_state_list": "",
         "gpu": gpu_id,
@@ -73,22 +72,22 @@ for train_state in train_state_list:
     }
 
     command_train = (
-        "python train_model_landcover.py "
+        "python landcover/train_model_landcover.py "
         "--output {output} "
         "--name {exp_name} "
         "--gpu {gpu} "
         "--verbose 2 "
         "--data_dir {data_dir} "
-        "--training_states {train_state_list} "
+        "--training_states {TRAIN_STATE_LIST} "
         "--validation_states {val_state_list} "
         "--model_type {model_type} "
         "--learning_rate {learning_rate} "
         "--loss {loss} "
         "--batch_size {batch_size} "
     ).format(**args)
-    jobs_per_gpu[gpu_idx].append((command_train, args))
+    JOBS_PER_GPU[GPU_IDX].append((command_train, args))
 
-    for test_state in test_state_list:
+    for test_state in TEST_STATE_LIST:
 
         args = {
             "test_csv": "{}/{}_extended-test_tiles.csv".format(DATASET_DIR, test_state),
@@ -98,28 +97,28 @@ for train_state in train_state_list:
             "log_name": "log_test_{}.txt".format(test_state),
         }
         command_test = (
-            "python test_model_landcover.py "
+            "python landcover/test_model_landcover.py "
             "--input {test_csv} "
             "--output {output}/{exp_name}/ "
             "--model {output}/final_model.h5 "
             "--gpu {gpu}"
         ).format(**args)
-        jobs_per_gpu[gpu_idx].append((command_test, args))
+        JOBS_PER_GPU[GPU_IDX].append((command_test, args))
 
         args = args.copy()
         args["log_name"] = "log_acc_{}.txt".format(test_state)
         command_acc = (
-            "python compute_accuracy.py "
+            "python landcover/compute_accuracy.py "
             "--input {test_csv} "
             "--output {output}/{exp_name}/"
         ).format(**args)
-        jobs_per_gpu[gpu_idx].append((command_acc, args))
+        JOBS_PER_GPU[GPU_IDX].append((command_acc, args))
 
-    gpu_idx = (gpu_idx + 1) % num_gpus
+    GPU_IDX = (GPU_IDX + 1) % NUM_GPUS
 
 
-pool_sz = num_gpus
-pool = multiprocessing.Pool(num_gpus + 1)
-pool.map(run_jobs, jobs_per_gpu)
-pool.close()
-pool.join()
+POLL_SZ = NUM_GPUS
+POLL = multiprocessing.Poll(NUM_GPUS + 1)
+POLL.map(run_jobs, JOBS_PER_GPU)
+POLL.close()
+POLL.join()

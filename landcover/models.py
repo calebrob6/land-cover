@@ -1,14 +1,12 @@
-import keras
 import keras.backend as K
 from keras.models import Model
 from keras.layers import Lambda, Activation
 
 from keras.losses import categorical_crossentropy
+from segmentation_models import Unet as seg_Unet
 
 from architectures import UNet, FC_DenseNet, FCN_Small
 from utils import load_nlcd_stats
-
-from segmentation_models import Unet as seg_Unet
 
 
 def jaccard_loss(y_true, y_pred, smooth=0.001, num_classes=7):
@@ -35,8 +33,10 @@ def accuracy(y_true, y_pred):
     return num / (denom + 1)  # make sure we don't get divide by zero
 
 
-def hr_loss(boundary=0):
-    """The first channel of y_true should be all 1's if we want to use hr_loss, or all 0's if we don't want to use hr_loss
+def hr_loss():
+    """
+    The first channel of y_true should be all 1's if we want to use hr_loss,
+    or all 0's if we don't want to use hr_loss
     """
 
     def loss(y_true, y_pred):
@@ -48,7 +48,7 @@ def hr_loss(boundary=0):
     return loss
 
 
-def sr_loss(nlcd_class_weights, nlcd_means, nlcd_vars, boundary=0):
+def sr_loss(nlcd_class_weights, nlcd_means, nlcd_vars):
     """Calculate superres loss according to ICLR paper"""
 
     def ddist(prediction, c_interval_center, c_interval_radius):

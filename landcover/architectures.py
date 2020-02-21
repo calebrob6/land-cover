@@ -1,12 +1,12 @@
 """Heavily modified from https://github.com/pietz/unet-keras"""
-import keras.backend as K
-from keras.models import Input, Model
+from keras.models import Input
 from keras.layers import Conv2D, Concatenate, MaxPooling2D, Conv2DTranspose, Activation
-from keras.layers import UpSampling2D, Dropout, BatchNormalization
+from keras.layers import UpSampling2D, BatchNormalization
 
 # ------------------
 # TODO: implement different parameters in the unet and dense blocks
 # ------------------
+# pylint: disable=invalid-name
 
 
 def conv_bn_relu(m, dim):
@@ -18,7 +18,7 @@ def conv_bn_relu(m, dim):
 
 def unet_block(m, dim, res=False):
     x = m
-    for i in range(3):
+    for _ in range(3):
         x = conv_bn_relu(x, dim)
     return Concatenate()([m, x]) if res else x
 
@@ -26,13 +26,14 @@ def unet_block(m, dim, res=False):
 def dense_block(m, dim):
     x = m
     outputs = [x]
-    for i in range(3):
+    for _ in range(3):
         conv = conv_bn_relu(x, dim)
         x = Concatenate()([conv, x])
         outputs.append(conv)
     return Concatenate()(outputs)
 
 
+# pylint: disable=too-many-arguments
 def level_block_fixed_dims(m, dims, depth, acti, do, bn, mp, up, res, dense=False):
     max_depth = len(dims) - 1
     dim = dims[max_depth - depth]
@@ -54,7 +55,7 @@ def level_block_fixed_dims(m, dims, depth, acti, do, bn, mp, up, res, dense=Fals
 
 def UNet(
     img_shape,
-    dims=[32, 64, 128, 256, 128],
+    dims=(32, 64, 128, 256, 128),
     out_ch=1,
     activation="relu",
     dropout=False,
@@ -82,7 +83,7 @@ def UNet(
 
 def FC_DenseNet(
     img_shape,
-    dims=[32, 16, 16, 16, 16],
+    dims=(32, 16, 16, 16, 16),
     out_ch=1,
     activation="relu",
     dropout=False,
@@ -112,24 +113,7 @@ def FCN_Small(img_shape, out_ch):
     i = Input(shape=img_shape)
     # x = Conv2D(256, (3,3), activation=LeakyReLU(alpha=0.3), padding='same')
     x = conv_bn_relu(i, 64)
-    for j in range(15):
+    for _ in range(15):
         x = conv_bn_relu(x, 64)
     o = Conv2D(out_ch, 1, activation=None, name="logits")(x)
     return i, o
-
-
-if __name__ == "__main__":
-    K.clear_session()
-    i, o = FC_DenseNet((240, 240, 4), dims=[32, 16, 16, 16, 16], out_ch=5)
-    model = Model(inputs=i, outputs=o)
-    print(model.count_params())
-
-    K.clear_session()
-    i, o = UNet((240, 240, 4), dims=[32, 64, 128, 256, 128], out_ch=5)
-    model = Model(inputs=i, outputs=o)
-    print(model.count_params())
-
-    K.clear_session()
-    i, o = UNet((240, 240, 4), dims=[64, 32, 32, 32, 32], out_ch=5)
-    model = Model(inputs=i, outputs=o)
-    print(model.count_params())

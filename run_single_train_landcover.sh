@@ -73,7 +73,7 @@ echo ${LOG_FILE}
 
 # tail -f ${LOG_FILE}
 
-python -u train_model_landcover.py \
+python -u landcover/train_model_landcover.py \
     --output ${OUTPUT} \
     --name ${EXP_NAME} \
     --gpu ${GPU_ID} \

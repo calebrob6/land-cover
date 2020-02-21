@@ -61,7 +61,7 @@ do
 	echo $TEST_SPLIT
     TEST_CSV=/home/caleb/data//${TEST_SPLIT}_test_tiles.csv
     echo ${PRED_OUTPUT}/${EXP_NAME_OUT}/log_test_${TEST_SPLIT}.txt
-    unbuffer python -u test_model_landcover.py \
+    unbuffer python -u landcover/test_model_landcover.py \
         --input ${TEST_CSV} \
         --output ${PRED_OUTPUT}/${EXP_NAME_OUT}/ \
         --model ${OUTPUT}/${EXP_NAME}/${MODEL_FN} \
