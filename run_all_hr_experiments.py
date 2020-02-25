@@ -97,7 +97,7 @@ for train_state in TRAIN_STATE_LIST:
             "log_name": "log_test_{}.txt".format(test_state),
         }
         command_test = (
-            "python landcover/test_model_landcover.py "
+            "python landcover/testing_model_landcover.py "
             "--input {test_csv} "
             "--output {output}/{exp_name}/ "
             "--model {output}/final_model.h5 "

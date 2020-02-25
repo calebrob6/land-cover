@@ -56,7 +56,7 @@ Only works with `sudo azcopy`.
 
 Run all tests:
 ```
-pytest --pylint --cov=landcover
+pytest --pylint --cov=landcover/
 ```
 
 Format code:

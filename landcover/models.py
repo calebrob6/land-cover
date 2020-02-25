@@ -1,4 +1,5 @@
 import keras.backend as K
+import tensorflow as tf
 from keras.models import Model
 from keras.layers import Lambda, Activation
 
@@ -7,6 +8,8 @@ from segmentation_models import Unet as seg_Unet
 
 from architectures import UNet, FC_DenseNet, FCN_Small
 from utils import load_nlcd_stats
+
+MIRRORED_STRATEGY = tf.distribute.MirroredStrategy()
 
 
 def jaccard_loss(y_true, y_pred, smooth=0.001, num_classes=7):
@@ -148,36 +151,37 @@ def unet_from_segmentation_models(
 
 
 def make_model(inputs, outputs, optimizer, loss):
-    if loss == "superres":
-        outputs_sr = Lambda(lambda x: x, name="outputs_sr")(outputs)
-        model = Model(inputs=inputs, outputs=[outputs, outputs_sr])
-    else:
-        model = Model(inputs=inputs, outputs=outputs)
+    with MIRRORED_STRATEGY.scope():
+        if loss == "superres":
+            outputs_sr = Lambda(lambda x: x, name="outputs_sr")(outputs)
+            model = Model(inputs=inputs, outputs=[outputs, outputs_sr])
+        else:
+            model = Model(inputs=inputs, outputs=outputs)
 
-    if loss == "jaccard":
-        model.compile(
-            loss=jaccard_loss,
-            metrics=["categorical_crossentropy", "accuracy", jaccard_loss],
-            optimizer=optimizer,
-        )
-    elif loss == "crossentropy":
-        model.compile(
-            loss="categorical_crossentropy",
-            metrics=["categorical_crossentropy", "accuracy", jaccard_loss],
-            optimizer=optimizer,
-        )
-    elif loss == "superres":
+        if loss == "jaccard":
+            model.compile(
+                loss=jaccard_loss,
+                metrics=["categorical_crossentropy", "accuracy", jaccard_loss],
+                optimizer=optimizer,
+            )
+        elif loss == "crossentropy":
+            model.compile(
+                loss="categorical_crossentropy",
+                metrics=["categorical_crossentropy", "accuracy", jaccard_loss],
+                optimizer=optimizer,
+            )
+        elif loss == "superres":
 
-        nlcd_class_weights, nlcd_means, nlcd_vars = load_nlcd_stats()
-        model.compile(
-            optimizer=optimizer,
-            loss={
-                "outputs_hr": hr_loss(),
-                "outputs_sr": sr_loss(nlcd_class_weights, nlcd_means, nlcd_vars),
-            },
-            loss_weights={"outputs_hr": (39.0 / 40.0), "outputs_sr": (1.0 / 40.0)},
-            metrics={"outputs_hr": accuracy},
-        )
-    else:
-        print("Loss function not specified, model not compiled")
-    return model
+            nlcd_class_weights, nlcd_means, nlcd_vars = load_nlcd_stats()
+            model.compile(
+                optimizer=optimizer,
+                loss={
+                    "outputs_hr": hr_loss(),
+                    "outputs_sr": sr_loss(nlcd_class_weights, nlcd_means, nlcd_vars),
+                },
+                loss_weights={"outputs_hr": (39.0 / 40.0), "outputs_sr": (1.0 / 40.0)},
+                metrics={"outputs_hr": accuracy},
+            )
+        else:
+            print("Loss function not specified, model not compiled")
+        return model
