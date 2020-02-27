@@ -56,10 +56,19 @@ Only works with `sudo azcopy`.
 
 Make use of `run.py` to run an end to end process (training, testing and evaluation):
 ```
+nohup python run.py --name example_config
+```
+
+When leaving all arguments to default, they will be fetched from `landcover/config.py`.
+
+If you'd like to overwrite the defaults, you can set the arguments in the command line:
+```
 nohup python run.py -v 3 --data-dir chesapeake_data/ --output-dir results/ \
 --training-states ny_1m_2013 --validation-states ny_1m_2013 \
 --test-states ny_1m_2013  --name example --model unet --batch-size 16
 ```
+Or edit `landcover/config.py`.
+
 **Note:** the nohup command ensures the process keeps running even if the terminal is disconnected. It will also save an output with the logs in a `nohup.txt` file.
 
 ## Test
@@ -99,4 +108,3 @@ Please cite the following papers if you use this work:
 
 - Change `train_model_landcover.py` to save models without the superres loss, jaccard loss, or Lambda layers as these can cause problems with saving/loading in different versions.
 - Create a test script that computes accuracy on the fly without saving model results.
-- Make it easy to target other label sets (e.g instead of 4-class classification).

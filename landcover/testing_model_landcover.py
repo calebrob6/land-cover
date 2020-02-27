@@ -73,6 +73,9 @@ def do_args(arg_list, name):
         default=False,
         help="Is this a superres model",
     )
+    parser.add_argument(
+        "--classes", dest="classes", default=5, help="Number of target classes",
+    )
 
     return parser.parse_args(arg_list)
 
@@ -85,6 +88,7 @@ class Test:
         model_fn: str,
         save_probabilities: bool,
         superres: bool,
+        classes: int = 5,
     ):
         """Constructor for Test object.
 
@@ -108,6 +112,7 @@ class Test:
         self.model_fn = model_fn
         self.save_probabilities = save_probabilities
         self.superres = superres
+        self.classes = 5
         self.start_time = None
         self.end_time = None
 
@@ -265,9 +270,7 @@ class Test:
                 model.output_shape[1:][2],
                 16,
             )
-            # output[:,:,4] += output[:,:,5]
-            # output[:,:,4] += output[:,:,6]
-            output = output[:, :, :5]
+            output = output[:, :, : self.classes]
 
             # ----------------------------------------------------------------
             # Write out each softmax prediction to a separate file
@@ -277,7 +280,7 @@ class Test:
                 current_profile = naip_profile.copy()
                 current_profile["driver"] = "GTiff"
                 current_profile["dtype"] = "uint8"
-                current_profile["count"] = 5
+                current_profile["count"] = self.classes
                 current_profile["compress"] = "lzw"
 
                 # quantize the probabilities
@@ -285,15 +288,11 @@ class Test:
                 bins = bins / 255.0
                 output = np.digitize(output, bins=bins, right=True).astype(np.uint8)
 
-                f = rasterio.open(
+                with rasterio.open(
                     os.path.join(self.output_base, output_fn), "w", **current_profile
-                )
-                f.write(output[:, :, 0], 1)
-                f.write(output[:, :, 1], 2)
-                f.write(output[:, :, 2], 3)
-                f.write(output[:, :, 3], 4)
-                f.write(output[:, :, 4], 5)
-                f.close()
+                ) as f:
+                    for i in range(self.classes):
+                        f.write(output[:, :, i], i + 1)
 
             # ----------------------------------------------------------------
             # Write out the class predictions

@@ -1,7 +1,7 @@
 import numpy as np
 import keras.utils
 
-from utils import nlcd_classes_to_idx
+from utils import handle_labels, classes_in_key
 
 
 def color_aug(colors):
@@ -33,7 +33,13 @@ class DataGenerator(keras.utils.Sequence):
         steps_per_epoch,
         input_size,
         output_size,
-        num_channels,
+        num_channels=4,
+        num_classes=5,
+        lr_num_classes=22,
+        hr_labels_index=8,
+        lr_labels_index=9,
+        hr_label_key="data/cheaseapeake_to_hr_labels.txt",
+        lr_label_key="data/nlcd_to_lr_labels.txt",
         do_color_aug=False,
         do_superres=False,
         superres_only_states=(),
@@ -49,13 +55,25 @@ class DataGenerator(keras.utils.Sequence):
         self.output_size = output_size
 
         self.num_channels = num_channels
-        self.num_classes = 5
+        self.num_classes = num_classes
+        self.lr_num_classes = lr_num_classes
 
         self.do_color_aug = do_color_aug
 
         self.do_superres = do_superres
         self.superres_only_states = superres_only_states
         self.on_epoch_end()
+
+        self.hr_labels_index = (hr_labels_index,)
+        self.lr_labels_index = lr_labels_index
+
+        self.hr_label_key = hr_label_key
+        self.lr_label_key = lr_label_key
+
+        if self.hr_label_key:
+            assert self.num_classes == classes_in_key(self.hr_label_key)
+        if self.lr_label_key:
+            assert self.lr_num_classes == classes_in_key(self.lr_label_key)
 
     def __len__(self):
         """Denotes the number of batches per epoch"""
@@ -72,12 +90,18 @@ class DataGenerator(keras.utils.Sequence):
             dtype=np.float32,
         )
         y_hr_batch = np.zeros(
-            (self.batch_size, self.output_size, self.output_size, 5), dtype=np.float32
+            (self.batch_size, self.output_size, self.output_size, self.num_classes),
+            dtype=np.float32,
         )
         y_sr_batch = None
         if self.do_superres:
             y_sr_batch = np.zeros(
-                (self.batch_size, self.output_size, self.output_size, 22),
+                (
+                    self.batch_size,
+                    self.output_size,
+                    self.output_size,
+                    self.lr_num_classes,
+                ),
                 dtype=np.float32,
             )
 
@@ -102,16 +126,18 @@ class DataGenerator(keras.utils.Sequence):
 
             # setup x
             if self.do_color_aug:
-                x_batch[i] = color_aug(data[:, :, :4] / 255.0)
+                x_batch[i] = color_aug(data[:, :, : self.num_channels] / 255.0)
             else:
-                x_batch[i] = data[:, :, :4] / 255.0
+                x_batch[i] = data[:, :, : self.num_channels] / 255.0
 
             # setup y_highres
-            y_train_hr = data[:, :, 8]
-            y_train_hr[y_train_hr == 15] = 0
-            y_train_hr[y_train_hr == 5] = 4
-            y_train_hr[y_train_hr == 6] = 4
-            y_train_hr = keras.utils.to_categorical(y_train_hr, 5)
+            if self.hr_label_key:
+                y_train_hr = handle_labels(
+                    data[:, :, self.hr_labels_index], self.hr_label_key
+                )
+            else:
+                y_train_hr = data[:, :, self.hr_labels_index]
+            y_train_hr = keras.utils.to_categorical(y_train_hr, self.num_classes)
 
             if self.do_superres:
                 if state in self.superres_only_states:
@@ -124,8 +150,15 @@ class DataGenerator(keras.utils.Sequence):
 
             # setup y_superres
             if self.do_superres:
-                y_train_nlcd = nlcd_classes_to_idx(data[:, :, 9])
-                y_train_nlcd = keras.utils.to_categorical(y_train_nlcd, 22)
+                if self.lr_label_key:
+                    y_train_nlcd = handle_labels(
+                        data[:, :, self.lr_labels_index], self.lr_label_key
+                    )
+                else:
+                    y_train_nlcd = data[:, :, self.hr_labels_index]
+                y_train_nlcd = keras.utils.to_categorical(
+                    y_train_nlcd, self.lr_num_classes
+                )
                 y_sr_batch[i] = y_train_nlcd
 
         if self.do_superres:

@@ -1,45 +1,11 @@
 import os
 import time
-from collections import defaultdict
 
 import numpy as np
 
 import keras
 
-
-NLCD_CLASSES = [
-    0,
-    11,
-    12,
-    21,
-    22,
-    23,
-    24,
-    31,
-    41,
-    42,
-    43,
-    51,
-    52,
-    71,
-    72,
-    73,
-    74,
-    81,
-    82,
-    90,
-    95,
-    255,
-]
-NLCD_CLASSES_TO_IDX_MAP = defaultdict(
-    lambda: 0, {cl: i for i, cl in enumerate(NLCD_CLASSES)}
-)
-
-
-def nlcd_classes_to_idx(nlcd):
-    return np.vectorize(NLCD_CLASSES_TO_IDX_MAP.__getitem__)(np.squeeze(nlcd)).astype(
-        np.uint8
-    )
+import config
 
 
 def humansize(nbytes):
@@ -68,53 +34,44 @@ def schedule_stepped(epoch, lr, step_size=10):
         return lr
 
 
-def load_nlcd_stats():
-    nlcd_means = np.concatenate(
-        [np.zeros((22, 1)), np.loadtxt("data/nlcd_mu.txt")], axis=1
-    )
+def load_nlcd_stats(
+    stats_mu=config.LR_STATS_MU,
+    stats_sigma=config.LR_STATS_SIGMA,
+    class_weights=config.LR_CLASS_WEIGHTS,
+    lr_classes=config.LR_NCLASSES,
+    hr_classes=config.HR_NCLASSES,
+):
+    stats_mu = np.loadtxt(stats_mu)
+    assert lr_classes == stats_mu.shape[0]
+    assert hr_classes == (stats_mu.shape[1] + 1)
+    nlcd_means = np.concatenate([np.zeros((lr_classes, 1)), stats_mu], axis=1)
     nlcd_means[nlcd_means == 0] = 0.000001
     nlcd_means[:, 0] = 0
+    if stats_mu == "data/nlcd_mu.txt":
+        nlcd_means = do_nlcd_means_tuning(nlcd_means)
+
+    stats_sigma = np.loadtxt(stats_sigma)
+    assert lr_classes == stats_sigma.shape[0]
+    assert hr_classes == (stats_sigma.shape[1] + 1)
+    nlcd_vars = np.concatenate([np.zeros((lr_classes, 1)), stats_sigma], axis=1)
+    nlcd_vars[nlcd_vars < 0.0001] = 0.0001
+
+    if not class_weights:
+        nlcd_class_weights = np.ones((lr_classes,))
+    else:
+        nlcd_class_weights = np.loadtxt(class_weights)
+        assert lr_classes == nlcd_class_weights.shape[0]
+
+    return nlcd_class_weights, nlcd_means, nlcd_vars
+
+
+def do_nlcd_means_tuning(nlcd_means):
     nlcd_means[2:, 1] -= 0
     nlcd_means[3:7, 4] += 0.25
     nlcd_means = nlcd_means / np.maximum(0, nlcd_means).sum(axis=1, keepdims=True)
     nlcd_means[0, :] = 0
     nlcd_means[-1, :] = 0
-
-    nlcd_vars = np.concatenate(
-        [np.zeros((22, 1)), np.loadtxt("data/nlcd_sigma.txt")], axis=1
-    )
-    nlcd_vars[nlcd_vars < 0.0001] = 0.0001
-    nlcd_class_weights = np.ones((22,))
-
-    # Taken from the training script
-    nlcd_class_weights = np.array(
-        [
-            0.0,
-            1.0,
-            0.5,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            0.5,
-            1.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.5,
-            0.5,
-            1.0,
-            1.0,
-            0.0,
-        ]
-    )
-
-    return nlcd_class_weights, nlcd_means, nlcd_vars
+    return nlcd_means
 
 
 def find_key_by_str(keys, needle):
@@ -200,3 +157,22 @@ class LandcoverResults(keras.callbacks.Callback):
             f.close()
 
         self.epoch_num += 1
+
+
+def handle_labels(arr, key_txt):
+    key_array = np.loadtxt(key_txt)
+    trans_arr = arr
+
+    for translation in key_array:
+        # translation is (src label, dst label)
+        scr_l, dst_l = translation
+        if scr_l != dst_l:
+            trans_arr[trans_arr == scr_l] = dst_l
+
+    # translated array
+    return trans_arr
+
+
+def classes_in_key(key_txt):
+    key_array = np.loadtxt(key_txt)
+    return len(np.unique(key_array[:, 1]))

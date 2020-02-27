@@ -25,6 +25,7 @@ from collections import defaultdict
 
 # Setup
 from helpers import get_logger
+from utils import handle_labels
 
 logger = get_logger(__name__)
 
@@ -51,6 +52,9 @@ def do_args(arg_list, name):
         required=True,
         help="Path to filename that lists tiles",
     )
+    parser.add_argument(
+        "--classes", type=int, default=5, help="Number of target classes",
+    )
 
     return parser.parse_args(arg_list)
 
@@ -67,15 +71,21 @@ def bounds_intersection(bound0, bound1):
     return (left, bottom, right, top)
 
 
-def get_confusion_matrix(lc_vec, pred_vec):
-    cnf = np.zeros((4, 4), dtype=int)
-    for j in range(0, 4):
-        for k in range(0, 4):
+def get_confusion_matrix(lc_vec, pred_vec, classes):
+    cnf = np.zeros((classes - 1, classes - 1), dtype=int)
+    for j in range(0, classes - 1):
+        for k in range(0, classes - 1):
             cnf[j, k] = ((lc_vec == j + 1) & (pred_vec == k + 1)).sum()
     return cnf
 
 
-def compute_accuracy(pred_dir, input_fn):
+def compute_accuracy(
+    pred_dir: str,
+    input_fn: str,
+    classes: int = 5,
+    hr_label_key: str = "data/cheaseapeake_to_hr_labels.txt",
+    lr_label_key: str = "data/nlcd_to_lr_labels.txt",
+):
     data_dir = os.path.dirname(input_fn)
 
     logger.info(
@@ -91,8 +101,8 @@ def compute_accuracy(pred_dir, input_fn):
         logger.error(e)
         return
 
-    cm = np.zeros((4, 4), dtype=np.float32)
-    cm_dev = np.zeros((4, 4), dtype=np.float32)
+    cm = np.zeros((classes - 1, classes - 1,), dtype=np.float32)
+    cm_dev = np.zeros((classes - 1, classes - 1,), dtype=np.float32)
     acc_sum = 1e-6
     acc_num = 1e-6
     for i in range(len(fns)):
@@ -113,17 +123,11 @@ def compute_accuracy(pred_dir, input_fn):
         nlcd = nlcd_f.read()
         nlcd_f.close()
 
-        nlcd = nlcd.squeeze().astype(int)
+        nlcd = handle_labels(nlcd.squeeze().astype(int), lr_label_key)
 
-        lc[lc == 5] = 4
-        lc[lc == 6] = 4
-        lc[lc >= 7] = 0
-        lc = np.squeeze(lc).astype(int)
+        lc = handle_labels(np.squeeze(lc).astype(int), hr_label_key)
 
-        pred[pred == 5] = 4
-        pred[pred == 6] = 4
-        pred[pred >= 7] = 0
-        pred = np.squeeze(pred).astype(int)
+        pred = handle_labels(np.squeeze(pred).astype(int), hr_label_key)
 
         roi = (lc > 0) & (pred > 0)
         roi_dev = (lc > 0) & (pred > 0) & (nlcd >= 21) & (nlcd <= 24)
@@ -131,9 +135,11 @@ def compute_accuracy(pred_dir, input_fn):
         if np.sum(roi) > 0:
             if np.sum(roi_dev) > 0:
                 cm_dev += get_confusion_matrix(
-                    lc[roi_dev > 0].flatten(), pred[roi_dev > 0].flatten()
+                    lc[roi_dev > 0].flatten(), pred[roi_dev > 0].flatten(), classes
                 )
-            cm += get_confusion_matrix(lc[roi > 0].flatten(), pred[roi > 0].flatten())
+            cm += get_confusion_matrix(
+                lc[roi > 0].flatten(), pred[roi > 0].flatten(), classes
+            )
             accuracy = np.sum(lc[roi > 0] == pred[roi > 0]) / np.sum(roi)
             acc_sum += np.sum(lc[roi > 0] == pred[roi > 0])
             acc_num += np.sum(roi)
@@ -150,7 +156,7 @@ def compute_accuracy(pred_dir, input_fn):
 def main():
     program_name = "Accuracy computing script"
     args = do_args(sys.argv[1:], program_name)
-    acc, cm, cm_dev = compute_accuracy(args.output, args.input_fn)
+    acc, cm, cm_dev = compute_accuracy(args.output, args.input_fn, args.classes)
     print("-----------------------------")
     print(acc)
     print(cm)

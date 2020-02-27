@@ -29,6 +29,7 @@ from keras.optimizers import RMSprop, Adam
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 
 from helpers import get_logger
+import config
 
 logger = get_logger(__name__)
 
@@ -162,8 +163,13 @@ class Train:
         do_color: bool = False,
         do_superres: bool = False,
         input_shape: tuple = (240, 240, 4),
-        classes: int = 5,
+        classes: int = config.HR_NCLASSES,
         verbose: int = 2,
+        lr_num_classes: int = config.LR_NCLASSES,
+        hr_labels_index: int = config.HR_LABEL_INDEX,
+        lr_labels_index: int = config.LR_LABEL_INDEX,
+        hr_label_key: str = config.HR_LABEL_KEY,
+        lr_label_key: str = config.LR_LABEL_KEY,
     ):
         """Constructor for Train object.
 
@@ -233,6 +239,12 @@ class Train:
         self.training_steps_per_epoch = 300
         self.validation_steps_per_epoch = 39
 
+        self.lr_num_classes = lr_num_classes
+        self.hr_labels_index = hr_labels_index
+        self.lr_labels_index = lr_labels_index
+        self.hr_label_key = hr_label_key
+        self.lr_label_key = lr_label_key
+
         self.write_args()
 
         self.start_time = None
@@ -294,6 +306,12 @@ class Train:
             self.input_shape[0],
             self.input_shape[1],
             self.input_shape[2],
+            num_classes=self.classes,
+            lr_num_classes=self.lr_num_classes,
+            hr_labels_index=self.hr_labels_index,
+            lr_labels_index=self.lr_labels_index,
+            hr_label_key=self.hr_label_key,
+            lr_label_key=self.lr_label_key,
             do_color_aug=self.do_color,
             do_superres=self.do_superres,
             superres_only_states=self.superres_states,
@@ -305,6 +323,12 @@ class Train:
             self.input_shape[0],
             self.input_shape[1],
             self.input_shape[2],
+            num_classes=self.classes,
+            lr_num_classes=self.lr_num_classes,
+            hr_labels_index=self.hr_labels_index,
+            lr_labels_index=self.lr_labels_index,
+            hr_label_key=self.hr_label_key,
+            lr_label_key=self.lr_label_key,
             do_color_aug=self.do_color,
             do_superres=self.do_superres,
             superres_only_states=[],
