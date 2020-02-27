@@ -1,0 +1,9 @@
+patch_id,patch_fn,tile_id,x_coord,y_coord,size,lc_class_1_count,lc_class_2_count,lc_class_3_count,lc_class_4_count,lc_class_5_count,lc_class_6_count,lc_class_15_count,nlcd_class_0_count,nlcd_class_11_count,nlcd_class_12_count,nlcd_class_21_count,nlcd_class_22_count,nlcd_class_23_count,nlcd_class_24_count,nlcd_class_31_count,nlcd_class_41_count,nlcd_class_42_count,nlcd_class_43_count,nlcd_class_51_count,nlcd_class_52_count,nlcd_class_71_count,nlcd_class_72_count,nlcd_class_73_count,nlcd_class_74_count,nlcd_class_81_count,nlcd_class_82_count,nlcd_class_90_count,nlcd_class_95_count,nlcd_class_255_count
+0,test-train_patches/wv_1m_2014-m_3708020_sw_17_1-0.npz,0,2336,724,240,0,49599,15167,0,770,0,0,65405,0,0,10268,18,0,0,0,48367,0,0,0,0,0,0,0,0,2147,4736,0,0,0
+1,test-train_patches/wv_1m_2014-m_3708020_sw_17_1-1.npz,0,2147,7077,240,0,65471,0,0,65,0,0,65536,0,0,0,0,0,0,0,65536,0,0,0,0,0,0,0,0,0,0,0,0,296
+2,test-train_patches/wv_1m_2014-m_3708020_sw_17_1-2.npz,0,2114,6202,240,0,65536,0,0,0,0,0,65536,0,0,0,0,0,0,0,65536,0,0,0,0,0,0,0,0,0,0,0,0,0
+3,test-train_patches/wv_1m_2014-m_3708020_sw_17_1-3.npz,0,5568,6878,240,0,31214,34322,0,0,0,0,65536,0,0,13025,0,0,0,0,39784,7325,221,0,0,547,0,0,0,4634,0,0,0,690
+4,test-train_patches/wv_1m_2014-m_3708020_sw_17_1-4.npz,0,5754,5775,240,0,65536,0,0,0,0,0,65536,0,0,0,0,0,0,0,65536,0,0,0,0,0,0,0,0,0,0,0,0,1410
+5,test-train_patches/wv_1m_2014-m_3708020_sw_17_1-5.npz,0,3071,2776,240,0,65536,0,0,0,0,0,65536,0,0,0,0,0,0,0,65536,0,0,0,0,0,0,0,0,0,0,0,0,2545
+6,test-train_patches/wv_1m_2014-m_3708020_sw_17_1-6.npz,0,3884,6090,240,0,65536,0,0,0,0,0,65536,0,0,0,0,0,0,0,65536,0,0,0,0,0,0,0,0,0,0,0,0,5897
+7,test-train_patches/wv_1m_2014-m_3708020_sw_17_1-7.npz,0,5218,6807,240,0,14146,51390,0,0,0,0,65536,0,0,1456,0,0,0,0,49720,0,0,0,0,14360,0,0,0,0,0,0,0,3319
