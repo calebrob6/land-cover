@@ -52,6 +52,16 @@ sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
 ```
 Only works with `sudo azcopy`.
 
+## Usage
+
+Make use of `run.py` to run an end to end process (training, testing and evaluation):
+```
+nohup python run.py -v 3 --data-dir chesapeake_data/ --output-dir results/ \
+--training-states ny_1m_2013 --validation-states ny_1m_2013 \
+--test-states ny_1m_2013  --name example --model unet --batch-size 16
+```
+**Note:** the nohup command ensures the process keeps running even if the terminal is disconnected. It will also save an output with the logs in a `nohup.txt` file.
+
 ## Test
 
 Run all tests:

@@ -50,13 +50,19 @@ def eval_landcover_results(acc_file):
 def accuracy_jaccard(lines, s=-8, f=-4):
     lines_8 = lines[s:f]
     arr = process_line(lines_8)
+    return accuracy_jaccard_np(arr)
+
+
+def accuracy_jaccard_np(np_array):
+    rx, cy = np_array.shape
+    assert rx == cy
     j = 0
-    all_n = np.sum(arr)
-    diag = np.sum(np.diagonal(arr))
+    all_n = np.sum(np_array)
+    diag = np.sum(np.diagonal(np_array))
     acc = diag / all_n
-    for c in range(len(lines_8)):
-        j += arr[c, c] / np.sum(arr[c, :] + arr[:, c])
-    jaccard = j / len(lines_8)
+    for c in range(rx):
+        j += np_array[c, c] / np.sum(np_array[c, :] + np_array[:, c])
+    jaccard = j / rx
     logger.info("Accuracy: %.6f, Jaccard: %.6f", acc, jaccard)
     return acc, jaccard
 
