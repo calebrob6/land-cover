@@ -176,3 +176,13 @@ def handle_labels(arr, key_txt):
 def classes_in_key(key_txt):
     key_array = np.loadtxt(key_txt)
     return len(np.unique(key_array[:, 1]))
+
+
+def to_float(arr):
+    if config.DATA_TYPE == "int8":
+        res = arr / 255.0
+    elif config.DATA_TYPE == "int16":
+        res = arr / 10000.0
+    else:
+        raise ValueError("Select an appropriate data type.")
+    return res

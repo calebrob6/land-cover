@@ -1,7 +1,7 @@
 import numpy as np
 import keras.utils
 
-from utils import handle_labels, classes_in_key
+from utils import handle_labels, classes_in_key, to_float
 
 
 def color_aug(colors):
@@ -124,11 +124,13 @@ class DataGenerator(keras.utils.Sequence):
                     y_idx : y_idx + self.input_size, x_idx : x_idx + self.input_size, :
                 ]
 
+            data[:, :, : self.num_channels] = to_float(data[:, :, : self.num_channels])
+
             # setup x
             if self.do_color_aug:
-                x_batch[i] = color_aug(data[:, :, : self.num_channels] / 255.0)
+                x_batch[i] = color_aug(data[:, :, : self.num_channels])
             else:
-                x_batch[i] = data[:, :, : self.num_channels] / 255.0
+                x_batch[i] = data[:, :, : self.num_channels]
 
             # setup y_highres
             if self.hr_label_key:

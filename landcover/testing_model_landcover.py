@@ -29,6 +29,7 @@ import keras.models
 import keras.metrics
 
 from helpers import get_logger
+from utils import to_float
 
 logger = get_logger(__name__)
 
@@ -259,7 +260,7 @@ class Test:
 
             naip_fid = rasterio.open(naip_fn, "r")
             naip_profile = naip_fid.meta.copy()
-            naip_tile = naip_fid.read().astype(np.float32) / 255.0
+            naip_tile = to_float(naip_fid.read().astype(np.float32))
             naip_tile = np.rollaxis(naip_tile, 0, 3)
             naip_fid.close()
 

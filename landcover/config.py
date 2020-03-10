@@ -33,6 +33,10 @@ LR_NCLASSES = 22
 HR_LABEL_INDEX = 8
 LR_LABEL_INDEX = 9
 
+## Datatype of imagery
+# should be int8 (divide by 255) or int16 (divide by 10000)
+DATA_TYPE = "int8"
+
 ## Keys for transformation of labels
 HR_LABEL_KEY = "data/cheaseapeake_to_hr_labels.txt"
 LR_LABEL_KEY = "data/nlcd_to_lr_labels.txt"
