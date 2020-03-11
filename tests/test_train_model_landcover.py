@@ -31,6 +31,27 @@ def test_train_model_landcover_hr():
         assert model_weights.is_file()
 
 
+def test_train_model_landcover_transfer_hr():
+    with tempfile.TemporaryDirectory() as temp:
+        temp = Path(temp)
+        mock_data = FILE_DIR / "mock_data"
+        preload_weights = mock_data / "unet_final_model_transfer.h5"
+        subprocess.run(
+            "python3 landcover/train_model_landcover.py --output %s --name test "
+            "--data_dir %s --training_states test --validation_states test "
+            "--model_type unet --epochs 1 --loss jaccard --batch_size 1 --preload_weights %s"
+            % (str(temp), str(mock_data), str(preload_weights)),
+            shell=True,
+            check=True,
+        )
+        print(os.listdir(str(temp)))
+        output_dir = temp / "test"
+        assert output_dir.is_dir()
+        assert len(list(output_dir.rglob("*"))) == 6
+        model_weights = output_dir / "final_model.h5"
+        assert model_weights.is_file()
+
+
 def test_train_model_landcover_sr():
     with tempfile.TemporaryDirectory() as temp:
         temp = Path(temp)

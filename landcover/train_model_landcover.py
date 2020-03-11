@@ -138,6 +138,12 @@ def do_args(arg_list, name):
     parser.add_argument(
         "--batch_size", action="store", type=int, help="Batch size", default=128
     )
+    parser.add_argument(
+        "--preload_weights",
+        type=str,
+        default="",
+        help="Path to H5 containing weights to preload for training. Make sure architecture is the same.",
+    )
 
     return parser.parse_args(arg_list)
 
@@ -170,6 +176,7 @@ class Train:
         lr_labels_index: int = config.LR_LABEL_INDEX,
         hr_label_key: str = config.HR_LABEL_KEY,
         lr_label_key: str = config.LR_LABEL_KEY,
+        preload_weights: str = config.PRELOAD_WEIGHTS,
     ):
         """Constructor for Train object.
 
@@ -209,6 +216,8 @@ class Train:
             Number of target classes (number of classes in training data).
         verbose : int
             Level of verbosity of fit method (passed to keras) 0 to 2 (silent to verbose).
+        preload_weights : str
+            Path to H5 containing weights to preload for training. Make sure architecture is the same.
         """
         self.verbose = verbose
         self.output = output
@@ -244,6 +253,8 @@ class Train:
         self.lr_labels_index = lr_labels_index
         self.hr_label_key = hr_label_key
         self.lr_label_key = lr_label_key
+
+        self.preload_weights = preload_weights
 
         self.write_args()
 
@@ -360,6 +371,8 @@ class Train:
             model = models.fcn_small(
                 self.input_shape, self.classes, optimizer, self.loss
             )
+        if self.preload_weights:
+            model.load_weights(self.preload_weights)
         model.summary()
         return model
 

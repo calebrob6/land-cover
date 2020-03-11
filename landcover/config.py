@@ -45,3 +45,8 @@ LR_LABEL_KEY = "data/nlcd_to_lr_labels.txt"
 LR_STATS_MU = "data/nlcd_mu.txt"
 LR_STATS_SIGMA = "data/nlcd_sigma.txt"
 LR_CLASS_WEIGHTS = "data/nlcd_class_weights.txt"
+
+# Weights to use in transfer learning
+# Will load file if not empty
+# MAKE SURE ARCHITECTURE IS THE SAME
+PRELOAD_WEIGHTS = ""
