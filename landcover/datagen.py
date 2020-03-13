@@ -157,7 +157,7 @@ class DataGenerator(keras.utils.Sequence):
                         data[:, :, self.lr_labels_index], self.lr_label_key
                     )
                 else:
-                    y_train_nlcd = data[:, :, self.hr_labels_index]
+                    y_train_nlcd = data[:, :, self.lr_labels_index]
                 y_train_nlcd = keras.utils.to_categorical(
                     y_train_nlcd, self.lr_num_classes
                 )

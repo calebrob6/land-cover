@@ -123,11 +123,15 @@ def compute_accuracy(
         nlcd = nlcd_f.read()
         nlcd_f.close()
 
-        nlcd = handle_labels(nlcd.squeeze().astype(int), lr_label_key)
+        nlcd = nlcd.squeeze().astype(int)
+        if lr_label_key:
+            nlcd = handle_labels(nlcd, lr_label_key)
 
-        lc = handle_labels(np.squeeze(lc).astype(int), hr_label_key)
-
-        pred = handle_labels(np.squeeze(pred).astype(int), hr_label_key)
+        lc = np.squeeze(lc).astype(int)
+        pred = np.squeeze(pred).astype(int)
+        if hr_label_key:
+            lc = handle_labels(lc, hr_label_key)
+            pred = handle_labels(pred, hr_label_key)
 
         roi = (lc > 0) & (pred > 0)
         roi_dev = (lc > 0) & (pred > 0) & (nlcd >= 21) & (nlcd <= 24)

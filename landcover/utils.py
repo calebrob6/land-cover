@@ -182,7 +182,7 @@ def to_float(arr):
     if config.DATA_TYPE == "int8":
         res = arr / 255.0
     elif config.DATA_TYPE == "int16":
-        res = arr / 10000.0
+        res = arr / 4096.0
     else:
         raise ValueError("Select an appropriate data type.")
     return res

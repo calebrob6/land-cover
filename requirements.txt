@@ -10,4 +10,3 @@ black
 pylint
 pytest-pylint
 pytest-cov
-pytest-sugar

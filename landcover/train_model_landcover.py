@@ -282,6 +282,8 @@ class Train:
         for state in self.training_states:
             logger.info("Adding training patches from %s" % (state))
             fn = os.path.join(self.data_dir, "%s_extended-train_patches.csv" % (state))
+            if not os.path.isfile(fn):
+                fn = os.path.join(self.data_dir, "%s-train_patches.csv" % (state))
             df = pd.read_csv(fn)
             for fn in df["patch_fn"].values:
                 training_patches.append((os.path.join(self.data_dir, fn), state))
@@ -290,6 +292,8 @@ class Train:
         for state in self.validation_states:
             logger.info("Adding validation patches from %s" % (state))
             fn = os.path.join(self.data_dir, "%s_extended-val_patches.csv" % (state))
+            if not os.path.isfile(fn):
+                fn = os.path.join(self.data_dir, "%s-val_patches.csv" % (state))
             df = pd.read_csv(fn)
             for fn in df["patch_fn"].values:
                 validation_patches.append((os.path.join(self.data_dir, fn), state))
@@ -372,6 +376,9 @@ class Train:
                 self.input_shape, self.classes, optimizer, self.loss
             )
         if self.preload_weights:
+            logger.info("=====================================================")
+            logger.info(f"Using weights from {self.preload_weights}")
+            logger.info("=====================================================")
             model.load_weights(self.preload_weights)
         model.summary()
         return model
