@@ -71,6 +71,18 @@ Or edit `landcover/config.py`.
 
 **Note:** the nohup command ensures the process keeps running even if the terminal is disconnected. It will also save an output with the logs in a `nohup.txt` file.
 
+### TensorBoard
+
+To display metrics in TensorBoard run in the instance:
+```
+gsutil rsync -r land-cover/logs/ gs://lc-training-data/logs/
+```
+
+Locally run:
+```
+tensorboard --logdir gs://lc-training-data/logs
+```
+
 ## Test
 
 Run all tests:

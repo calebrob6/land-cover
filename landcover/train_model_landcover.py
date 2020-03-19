@@ -27,6 +27,7 @@ import datagen
 from keras.models import Model
 from keras.optimizers import RMSprop, Adam
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
+from tensorflow.keras.callbacks import TensorBoard
 
 from helpers import get_logger
 import config
@@ -380,6 +381,7 @@ class Train:
             logger.info(f"Using weights from {self.preload_weights}")
             logger.info("=====================================================")
             model.load_weights(self.preload_weights)
+        model.run_eagerly = True
         model.summary()
         return model
 
@@ -440,6 +442,7 @@ class Train:
             save_weights_only=False,
             period=20,
         )
+        tensorboard_callback = TensorBoard(log_dir=f"logs/")
 
         training_generator, validation_generator = self.load_data()
 
@@ -448,11 +451,13 @@ class Train:
                 validation_callback,
                 learning_rate_callback,
                 model_checkpoint_callback,
+                tensorboard_callback
             ]
         else:
             callbacks = [
                 validation_callback,
                 model_checkpoint_callback,
+                tensorboard_callback
             ]
         model.fit_generator(
             training_generator,

@@ -112,5 +112,6 @@ venv.bak/
 chesapeake_data/
 
 ## Misc files to ignore
-# OS specific files 
+# OS specific files
 .DS_Store
+logs
