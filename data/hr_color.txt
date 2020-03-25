@@ -1,0 +1,5 @@
+label, name, red, green, blue
+1, Water, 1, 39, 255
+2, Forest, 51, 160, 44
+3, Field, 126, 237, 14
+4, Impervious Surfaces, 255, 1, 1

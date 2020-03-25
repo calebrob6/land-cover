@@ -1,0 +1,22 @@
+label, name, red, green, blue
+1, Open water, 72, 109, 162
+2, Perennial ice, 231, 239, 252
+3, Developed - open space, 225, 205, 206
+4, Developed - low intensity, 220, 152, 129
+5, Developed - med intensity, 241, 1, 0
+6, Developed - high intensity, 171, 1, 1
+7, Barren land, 179, 175, 164
+8, Deciduous forest, 108, 169, 102
+9, Evergreen forest, 29, 101, 51
+10, Mixed forest, 189, 204, 147
+11, Dwarf shrub, 175, 150, 60
+12, Shrub/scrub, 209, 187, 130
+13, Grassland, 237, 236, 205
+14, Sedge, 208, 209, 129
+15, Lichens, 164, 204, 81
+16, Moss, 130, 186, 157
+17, Pasture/Hay, 221, 216, 62
+18, Cultivated crops, 174, 114, 41
+19, Woody wetlands, 187, 215, 237
+20, Herbaceous Wetlands, 113, 164, 193
+21, None, 0, 0, 0

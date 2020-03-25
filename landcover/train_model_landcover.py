@@ -145,6 +145,12 @@ def do_args(arg_list, name):
         default="",
         help="Path to H5 containing weights to preload for training. Make sure architecture is the same.",
     )
+    parser.add_argument(
+        "--data_type",
+        type=str,
+        default="int8",
+        help="Data type of imagery patches. int8 or int16",
+    )
 
     return parser.parse_args(arg_list)
 
@@ -178,6 +184,7 @@ class Train:
         hr_label_key: str = config.HR_LABEL_KEY,
         lr_label_key: str = config.LR_LABEL_KEY,
         preload_weights: str = config.PRELOAD_WEIGHTS,
+        data_type: str = config.DATA_TYPE,
     ):
         """Constructor for Train object.
 
@@ -219,6 +226,8 @@ class Train:
             Level of verbosity of fit method (passed to keras) 0 to 2 (silent to verbose).
         preload_weights : str
             Path to H5 containing weights to preload for training. Make sure architecture is the same.
+        data_type: str
+            Data type of imagery patches. int8 or int16
         """
         self.verbose = verbose
         self.output = output
@@ -256,6 +265,7 @@ class Train:
         self.lr_label_key = lr_label_key
 
         self.preload_weights = preload_weights
+        self.data_type = data_type
 
         self.write_args()
 
@@ -331,6 +341,7 @@ class Train:
             do_color_aug=self.do_color,
             do_superres=self.do_superres,
             superres_only_states=self.superres_states,
+            data_type=self.data_type,
         )
         validation_generator = datagen.DataGenerator(
             validation_patches,
@@ -348,6 +359,7 @@ class Train:
             do_color_aug=self.do_color,
             do_superres=self.do_superres,
             superres_only_states=[],
+            data_type=self.data_type,
         )
         return training_generator, validation_generator
 
@@ -442,23 +454,29 @@ class Train:
             save_weights_only=False,
             period=20,
         )
-        tensorboard_callback = TensorBoard(log_dir=f"logs/")
+        log_dir_tag = f"logs/{self.name} {str(datetime.datetime.now())}"
+        tensorboard_callback = TensorBoard(log_dir=log_dir_tag)
 
         training_generator, validation_generator = self.load_data()
 
+        model_diagnoser = utils.ModelDiagnoser(
+            training_generator,
+            self.batch_size,
+            1,
+            f"{log_dir_tag}/images",
+            self.do_superres,
+        )
+
+        callbacks = [
+            validation_callback,
+            model_checkpoint_callback,
+            tensorboard_callback,
+            model_diagnoser,
+        ]
+
         if learning_rate_flag:
-            callbacks = [
-                validation_callback,
-                learning_rate_callback,
-                model_checkpoint_callback,
-                tensorboard_callback
-            ]
-        else:
-            callbacks = [
-                validation_callback,
-                model_checkpoint_callback,
-                tensorboard_callback
-            ]
+            callback.append(learning_rate_callback)
+
         model.fit_generator(
             training_generator,
             steps_per_epoch=self.training_steps_per_epoch,

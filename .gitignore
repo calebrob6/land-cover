@@ -110,6 +110,7 @@ venv.bak/
 # Downloaded data
 # prevents showing 5k+ changes in your git client
 chesapeake_data/
+africa_data/
 
 ## Misc files to ignore
 # OS specific files

@@ -41,6 +41,10 @@ DATA_TYPE = "int8"
 HR_LABEL_KEY = "data/cheaseapeake_to_hr_labels.txt"
 LR_LABEL_KEY = "data/nlcd_to_lr_labels.txt"
 
+## COLORMAP files for labels
+HR_COLOR = "data/hr_color.txt"
+LR_COLOR = "data/nlcd_color.txt"
+
 ## LR files used for superres loss
 LR_STATS_MU = "data/nlcd_mu.txt"
 LR_STATS_SIGMA = "data/nlcd_sigma.txt"
