@@ -27,6 +27,7 @@ import datagen
 from keras.models import Model
 from keras.optimizers import RMSprop, Adam
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
+from tensorflow.keras.callbacks import TensorBoard
 
 from helpers import get_logger
 import config
@@ -138,6 +139,18 @@ def do_args(arg_list, name):
     parser.add_argument(
         "--batch_size", action="store", type=int, help="Batch size", default=128
     )
+    parser.add_argument(
+        "--preload_weights",
+        type=str,
+        default="",
+        help="Path to H5 containing weights to preload for training. Make sure architecture is the same.",
+    )
+    parser.add_argument(
+        "--data_type",
+        type=str,
+        default="int8",
+        help="Data type of imagery patches. int8 or int16",
+    )
 
     return parser.parse_args(arg_list)
 
@@ -170,6 +183,8 @@ class Train:
         lr_labels_index: int = config.LR_LABEL_INDEX,
         hr_label_key: str = config.HR_LABEL_KEY,
         lr_label_key: str = config.LR_LABEL_KEY,
+        preload_weights: str = config.PRELOAD_WEIGHTS,
+        data_type: str = config.DATA_TYPE,
     ):
         """Constructor for Train object.
 
@@ -209,6 +224,10 @@ class Train:
             Number of target classes (number of classes in training data).
         verbose : int
             Level of verbosity of fit method (passed to keras) 0 to 2 (silent to verbose).
+        preload_weights : str
+            Path to H5 containing weights to preload for training. Make sure architecture is the same.
+        data_type: str
+            Data type of imagery patches. int8 or int16
         """
         self.verbose = verbose
         self.output = output
@@ -245,6 +264,9 @@ class Train:
         self.hr_label_key = hr_label_key
         self.lr_label_key = lr_label_key
 
+        self.preload_weights = preload_weights
+        self.data_type = data_type
+
         self.write_args()
 
         self.start_time = None
@@ -271,6 +293,8 @@ class Train:
         for state in self.training_states:
             logger.info("Adding training patches from %s" % (state))
             fn = os.path.join(self.data_dir, "%s_extended-train_patches.csv" % (state))
+            if not os.path.isfile(fn):
+                fn = os.path.join(self.data_dir, "%s-train_patches.csv" % (state))
             df = pd.read_csv(fn)
             for fn in df["patch_fn"].values:
                 training_patches.append((os.path.join(self.data_dir, fn), state))
@@ -279,6 +303,8 @@ class Train:
         for state in self.validation_states:
             logger.info("Adding validation patches from %s" % (state))
             fn = os.path.join(self.data_dir, "%s_extended-val_patches.csv" % (state))
+            if not os.path.isfile(fn):
+                fn = os.path.join(self.data_dir, "%s-val_patches.csv" % (state))
             df = pd.read_csv(fn)
             for fn in df["patch_fn"].values:
                 validation_patches.append((os.path.join(self.data_dir, fn), state))
@@ -315,6 +341,7 @@ class Train:
             do_color_aug=self.do_color,
             do_superres=self.do_superres,
             superres_only_states=self.superres_states,
+            data_type=self.data_type,
         )
         validation_generator = datagen.DataGenerator(
             validation_patches,
@@ -332,6 +359,7 @@ class Train:
             do_color_aug=self.do_color,
             do_superres=self.do_superres,
             superres_only_states=[],
+            data_type=self.data_type,
         )
         return training_generator, validation_generator
 
@@ -360,6 +388,12 @@ class Train:
             model = models.fcn_small(
                 self.input_shape, self.classes, optimizer, self.loss
             )
+        if self.preload_weights:
+            logger.info("=====================================================")
+            logger.info(f"Using weights from {self.preload_weights}")
+            logger.info("=====================================================")
+            model.load_weights(self.preload_weights)
+        model.run_eagerly = True
         model.summary()
         return model
 
@@ -420,20 +454,29 @@ class Train:
             save_weights_only=False,
             period=20,
         )
+        log_dir_tag = f"logs/{self.name} {str(datetime.datetime.now())}"
+        tensorboard_callback = TensorBoard(log_dir=log_dir_tag)
 
         training_generator, validation_generator = self.load_data()
 
+        model_diagnoser = utils.ModelDiagnoser(
+            training_generator,
+            self.batch_size,
+            1,
+            f"{log_dir_tag}/images",
+            self.do_superres,
+        )
+
+        callbacks = [
+            validation_callback,
+            model_checkpoint_callback,
+            tensorboard_callback,
+            model_diagnoser,
+        ]
+
         if learning_rate_flag:
-            callbacks = [
-                validation_callback,
-                learning_rate_callback,
-                model_checkpoint_callback,
-            ]
-        else:
-            callbacks = [
-                validation_callback,
-                model_checkpoint_callback,
-            ]
+            callback.append(learning_rate_callback)
+
         model.fit_generator(
             training_generator,
             steps_per_epoch=self.training_steps_per_epoch,

@@ -1,7 +1,10 @@
 import numpy as np
 import keras.utils
 
-from utils import handle_labels, classes_in_key
+from utils import handle_labels, classes_in_key, to_float
+from helpers import get_logger
+
+logger = get_logger(__name__)
 
 
 def color_aug(colors):
@@ -43,6 +46,7 @@ class DataGenerator(keras.utils.Sequence):
         do_color_aug=False,
         do_superres=False,
         superres_only_states=(),
+        data_type="uint16",
     ):
         """Initialization"""
 
@@ -69,6 +73,8 @@ class DataGenerator(keras.utils.Sequence):
 
         self.hr_label_key = hr_label_key
         self.lr_label_key = lr_label_key
+
+        self.data_type = data_type
 
         if self.hr_label_key:
             assert self.num_classes == classes_in_key(self.hr_label_key)
@@ -124,11 +130,11 @@ class DataGenerator(keras.utils.Sequence):
                     y_idx : y_idx + self.input_size, x_idx : x_idx + self.input_size, :
                 ]
 
+            x_batch[i] = to_float(data[:, :, : self.num_channels], self.data_type)
+
             # setup x
             if self.do_color_aug:
-                x_batch[i] = color_aug(data[:, :, : self.num_channels] / 255.0)
-            else:
-                x_batch[i] = data[:, :, : self.num_channels] / 255.0
+                x_batch[i] = color_aug(x_batch[i])
 
             # setup y_highres
             if self.hr_label_key:
@@ -155,7 +161,7 @@ class DataGenerator(keras.utils.Sequence):
                         data[:, :, self.lr_labels_index], self.lr_label_key
                     )
                 else:
-                    y_train_nlcd = data[:, :, self.hr_labels_index]
+                    y_train_nlcd = data[:, :, self.lr_labels_index]
                 y_train_nlcd = keras.utils.to_categorical(
                     y_train_nlcd, self.lr_num_classes
                 )

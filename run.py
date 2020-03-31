@@ -152,6 +152,8 @@ def main():
         # Run testing
         ## Get test file name
         input_fn = Path(args.data_dir) / ("%s_extended-test_tiles.csv" % test_state)
+        if not input_fn.is_file():
+            input_fn = Path(args.data_dir) / ("%s-test_tiles.csv" % test_state)
 
         ## Get model file name
         model_fn = Path(args.output_dir) / args.name / "final_model.h5"
@@ -172,7 +174,11 @@ def main():
 
         # Run accuracy
         acc, cm_s, cm_dev_s = compute_accuracy(
-            pred_dir=prediction_dir, input_fn=input_fn
+            pred_dir=prediction_dir,
+            input_fn=input_fn,
+            classes=config.HR_NCLASSES,
+            hr_label_key=config.HR_LABEL_KEY,
+            lr_label_key=config.LR_LABEL_KEY,
         )
         logger.info("Overall accuracy for %s: %.4f", test_state, acc)
 

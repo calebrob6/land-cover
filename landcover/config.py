@@ -33,11 +33,24 @@ LR_NCLASSES = 22
 HR_LABEL_INDEX = 8
 LR_LABEL_INDEX = 9
 
+## Datatype of imagery
+# should be int8 (divide by 255) or int16 (divide by 10000)
+DATA_TYPE = "int8"
+
 ## Keys for transformation of labels
 HR_LABEL_KEY = "data/cheaseapeake_to_hr_labels.txt"
 LR_LABEL_KEY = "data/nlcd_to_lr_labels.txt"
+
+## COLORMAP files for labels
+HR_COLOR = "data/hr_color.txt"
+LR_COLOR = "data/nlcd_color.txt"
 
 ## LR files used for superres loss
 LR_STATS_MU = "data/nlcd_mu.txt"
 LR_STATS_SIGMA = "data/nlcd_sigma.txt"
 LR_CLASS_WEIGHTS = "data/nlcd_class_weights.txt"
+
+# Weights to use in transfer learning
+# Will load file if not empty
+# MAKE SURE ARCHITECTURE IS THE SAME
+PRELOAD_WEIGHTS = ""

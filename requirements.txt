@@ -4,10 +4,10 @@ pandas==0.25.3
 rasterio==1.1.1
 segmentation-models==1.0.0
 Shapely==1.6.4.post2
-tensorflow==2.1.0
+tensorflow==2.2.0rc0
+sklearn
 pytest
 black
 pylint
 pytest-pylint
 pytest-cov
-pytest-sugar
