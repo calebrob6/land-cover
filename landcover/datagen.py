@@ -8,16 +8,16 @@ logger = get_logger(__name__)
 
 
 def color_aug(colors):
-    n_ch = colors.shape[0]
+    n_ch = colors.shape[-1]
     contra_adj = 0.05
     bright_adj = 0.05
 
-    ch_mean = np.mean(colors, axis=(-1, -2), keepdims=True).astype(np.float32)
+    ch_mean = np.mean(colors, axis=(0, 1), keepdims=True).astype(np.float32)
 
-    contra_mul = np.random.uniform(1 - contra_adj, 1 + contra_adj, (n_ch, 1, 1)).astype(
+    contra_mul = np.random.uniform(1 - contra_adj, 1 + contra_adj, (1, 1, n_ch)).astype(
         np.float32
     )
-    bright_mul = np.random.uniform(1 - bright_adj, 1 + bright_adj, (n_ch, 1, 1)).astype(
+    bright_mul = np.random.uniform(1 - bright_adj, 1 + bright_adj, (1, 1, n_ch)).astype(
         np.float32
     )
 
