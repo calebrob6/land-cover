@@ -1,5 +1,5 @@
 Keras==2.3.1
-numpy==1.16.4
+numpy
 pandas==0.25.3
 rasterio==1.1.1
 segmentation-models==1.0.0
