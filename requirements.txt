@@ -4,7 +4,7 @@ pandas==0.25.3
 rasterio==1.1.1
 segmentation-models==1.0.0
 Shapely==1.6.4.post2
-tensorflow==2.7.2
+tensorflow==2.9.3
 sklearn
 pytest
 black
